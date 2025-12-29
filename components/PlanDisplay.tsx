@@ -280,11 +280,12 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                            </h4>
                         </div>
                     </div>
-                    {/* Calorie chip moved below meal title */}
-                    <div className="bg-[var(--md-sys-color-primary-container)] px-3 py-1 rounded-full w-fit mb-3">
+                    {/* Meal description (now before calorie chip) */}
+                    <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] leading-relaxed mb-3">{item.meal.description}</p>
+                    {/* Calorie chip moved after meal description */}
+                    <div className="bg-[var(--md-sys-color-primary-container)] px-3 py-1 rounded-full w-fit">
                       <span className="text-xs font-black text-[var(--md-sys-color-on-primary-container)]">{item.meal.calories} kcal</span>
                     </div>
-                    <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] leading-relaxed">{item.meal.description}</p>
                  </div>
                </div>
              ))}
