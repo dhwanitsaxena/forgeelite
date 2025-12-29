@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { UserProfile, TransformationPlan, ProgressEntry, Exercise } from "../types";
 
@@ -242,38 +243,6 @@ export const generateTransformationPlan = async (
 
     return plan;
   });
-};
-
-export const generateExerciseFormPreview = async (
-  exerciseName: string, 
-  onProgress?: (msg: string) => void
-): Promise<{imageUrl: string; description: string}> => {
-  await ensureApiKey();
-  return withRetry(async () => {
-    const ai = getAI();
-    if (onProgress) onProgress("Drafting anatomical blueprint...");
-    
-    const prompt = `A simple, minimalist 2D anatomical diagram of a human body performing the exercise: ${exerciseName}. Instructional medical illustration, clean outlines, white background. Feature: bright red arrows to show direction of motion. Minimal text.`;
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image', // Updated model for image generation
-      contents: { parts: [{ text: prompt }] }, // Corrected contents format for image models
-    });
-
-    if (response.candidates?.[0]?.content?.parts) {
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
-          return { 
-            imageUrl: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`,
-            description: `Anatomical guide for ${exerciseName}.`
-          };
-        } else if (part.text) {
-          console.warn("Exercise image generation returned text instead of image:", part.text);
-        }
-      }
-    }
-    throw new Error("No image data returned from model");
-  }, 3, 3000);
 };
 
 export const getAlternativeExercise = async (currentExercise: Exercise, profile: UserProfile): Promise<Exercise> => {

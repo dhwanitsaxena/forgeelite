@@ -98,8 +98,6 @@ export interface Exercise {
   isAlternative?: boolean;
   isRehab?: boolean;
   isVariation?: boolean;
-  formImageUrl?: string; // New field for caching generated image URL
-  formDescription?: string; // New field for caching generated image description
 }
 
 export interface WorkoutDay {

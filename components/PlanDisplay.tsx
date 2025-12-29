@@ -1,6 +1,7 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { TransformationPlan, Goal, ProgressEntry, UserProfile, Exercise, WorkoutDay, Meal, DietPlan, ExperienceLevel } from '../types';
-import { Utensils, Dumbbell, Zap, ChevronRight, ChevronLeft, Info, LineChart, AlertTriangle, Book, Loader2, Heart, Eye, Shuffle, ArrowRightLeft, Sparkles, ShieldAlert, HeartPulse, Send, Pill, Beaker, Play, Activity, Target, Calendar, Apple, Pencil, Sunrise, Sun, Moon, Footprints, Flame, Rewind } from 'lucide-react'; // Added Sunrise, Sun, Moon, Footprints, Flame, Rewind
+import { Utensils, Dumbbell, Zap, ChevronRight, ChevronLeft, Info, LineChart, AlertTriangle, Book, Loader2, Heart, Eye, Shuffle, ArrowRightLeft, Sparkles, ShieldAlert, HeartPulse, Send, Pill, Beaker, Play, Activity, Target, Calendar, Apple, Pencil, Sunrise, Sun, Moon, Footprints, Flame, Rewind, Youtube } from 'lucide-react'; // Added Youtube
 import ProgressTracker from './ProgressTracker';
 import M3Button from './M3Button';
 import ExerciseGuideModal from './ExerciseGuideModal';
@@ -35,7 +36,7 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'diet' | 'workout' | 'progress'>('overview');
   // Updated state to hold exercise data along with its indices and sectionType
-  const [selectedExerciseData, setSelectedExerciseData] = useState<{ exercise: Exercise; dayIndex: number; exerciseIndex: number; sectionType: 'warmUpExercises' | 'exercises' | 'rehabExercises' | 'coolDownExercises' } | null>(null);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null); // Simplified state
   const [swappingExercise, setSwappingExercise] = useState<string | null>(null);
   const [activeWorkoutCard, setActiveWorkoutCard] = useState(0); // Initialize to 0, alignedWorkoutPlan[0] is always "today"
   const [activeDietDayIndex, setActiveDietDayIndex] = useState(0); // New state for daily diet plan
@@ -91,25 +92,6 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
       console.error("Exercise swap failed:", e);
     } finally {
       setSwappingExercise(null);
-    }
-  };
-
-  // Function to update an exercise's form image/description (for caching)
-  const handleUpdateExerciseForm = (updatedExercise: Exercise, dayIndex: number, exerciseIndex: number, sectionType: ExerciseSection) => {
-    const newPlan = { ...plan };
-    const newWorkoutPlan = [...(newPlan.workoutPlan || [])];
-    
-    if (newWorkoutPlan[dayIndex]) {
-      const newDay = { ...newWorkoutPlan[dayIndex] };
-      
-      // Ensure the array exists and update it
-      const targetExercises = [...(newDay[sectionType] || [])];
-      if (targetExercises[exerciseIndex]) {
-        targetExercises[exerciseIndex] = updatedExercise;
-        newDay[sectionType] = targetExercises;
-        newPlan.workoutPlan = newWorkoutPlan;
-        onUpdatePlanLocally(newPlan);
-      }
     }
   };
 
@@ -415,10 +397,10 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                               <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed italic mb-4">"{ex.tips}"</p>
                               {profile.experienceLevel === ExperienceLevel.BEGINNER && (
                                   <button 
-                                    onClick={() => setSelectedExerciseData({ exercise: ex, dayIndex: activeWorkoutCard, exerciseIndex: exIdx, sectionType: 'warmUpExercises' })} 
+                                    onClick={() => setSelectedExercise(ex)} 
                                     className="text-xs font-black uppercase text-orange-600 flex items-center gap-1.5 hover:opacity-60 transition-opacity"
                                   >
-                                    <Play size={14} fill="currentColor" /> Guide
+                                    <Youtube size={14} /> 
                                   </button>
                               )}
                             </div>
@@ -449,10 +431,10 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                             {profile.experienceLevel === ExperienceLevel.BEGINNER && (
                                 <button 
                                   disabled={isSwapping}
-                                  onClick={() => setSelectedExerciseData({ exercise: ex, dayIndex: activeWorkoutCard, exerciseIndex: exIdx, sectionType: 'exercises' })} 
+                                  onClick={() => setSelectedExercise(ex)} 
                                   className="text-xs font-black uppercase text-[var(--md-sys-color-primary)] flex items-center gap-1.5 hover:opacity-60 transition-opacity disabled:opacity-20"
                                 >
-                                  <Play size={14} fill="currentColor" /> Form
+                                  <Youtube size={14} /> 
                                 </button>
                             )}
                             <button 
@@ -492,10 +474,10 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                                <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed italic mb-4">"{rehabEx.tips}"</p>
                                {profile.experienceLevel === ExperienceLevel.BEGINNER && (
                                    <button 
-                                     onClick={() => setSelectedExerciseData({ exercise: rehabEx, dayIndex: activeWorkoutCard, exerciseIndex: rehabExIdx, sectionType: 'rehabExercises' })} 
+                                     onClick={() => setSelectedExercise(rehabEx)} 
                                      className="text-xs font-black uppercase text-green-600 flex items-center gap-1.5 hover:opacity-60 transition-opacity"
                                    >
-                                     <Play size={14} fill="currentColor" /> Guide
+                                     <Youtube size={14} />
                                    </button>
                                )}
                              </div>
@@ -528,10 +510,10 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                               <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed italic mb-4">"{ex.tips}"</p>
                               {profile.experienceLevel === ExperienceLevel.BEGINNER && (
                                   <button 
-                                    onClick={() => setSelectedExerciseData({ exercise: ex, dayIndex: activeWorkoutCard, exerciseIndex: exIdx, sectionType: 'coolDownExercises' })} 
+                                    onClick={() => setSelectedExercise(ex)} 
                                     className="text-xs font-black uppercase text-blue-600 flex items-center gap-1.5 hover:opacity-60 transition-opacity"
                                   >
-                                    <Play size={14} fill="currentColor" /> Guide
+                                    <Youtube size={14} />
                                   </button>
                               )}
                             </div>
@@ -618,14 +600,10 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
         </div>
       </div>
 
-      {selectedExerciseData && (
+      {selectedExercise && (
         <ExerciseGuideModal 
-          exercise={selectedExerciseData.exercise} 
-          onClose={() => setSelectedExerciseData(null)} 
-          onUpdateExercise={handleUpdateExerciseForm}
-          dayIndex={selectedExerciseData.dayIndex}
-          exerciseIndex={selectedExerciseData.exerciseIndex}
-          sectionType={selectedExerciseData.sectionType}
+          exercise={selectedExercise} 
+          onClose={() => setSelectedExercise(null)} 
         />
       )}
     </div>
