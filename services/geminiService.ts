@@ -2,14 +2,20 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { UserProfile, TransformationPlan, ProgressEntry, Exercise } from "../types";
 
 /**
- * Ensures user has selected an API key before proceeding.
+ * Ensures user has selected an API key before proceeding in the AI Studio environment.
+ * In other environments, this function will gracefully do nothing.
  */
 const ensureApiKey = async () => {
-  const hasKey = await (window as any).aistudio.hasSelectedApiKey();
-  if (!hasKey) {
-    await (window as any).aistudio.openSelectKey();
-    // Guideline: proceed assuming selection was successful
+  // Check if window.aistudio exists before attempting to use it.
+  // This prevents ReferenceErrors in environments like Vercel where it's not present.
+  if (typeof (window as any).aistudio !== 'undefined' && (window as any).aistudio.hasSelectedApiKey) {
+    const hasKey = await (window as any).aistudio.hasSelectedApiKey();
+    if (!hasKey) {
+      await (window as any).aistudio.openSelectKey();
+      // Guideline: proceed assuming selection was successful
+    }
   }
+  // If window.aistudio is not available, or methods don't exist, do nothing.
 };
 
 /**
