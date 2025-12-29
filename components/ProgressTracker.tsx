@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { ProgressEntry } from '../types';
 import { TrendingUp, Plus, Activity, Ruler, Pencil } from 'lucide-react'; // Added Pencil icon

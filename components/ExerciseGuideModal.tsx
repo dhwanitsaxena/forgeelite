@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Exercise } from '../types';
 import { X, ShieldCheck, Sparkles, AlertCircle, RefreshCw, Activity, ArrowRight } from 'lucide-react';

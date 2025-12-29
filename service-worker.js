@@ -1,4 +1,5 @@
 
+
 const CACHE_NAME = 'forge-cache-v1';
 const urlsToCache = [
   './', // Cache the root index.html
@@ -17,6 +18,7 @@ const urlsToCache = [
   './components/ProgressTracker.tsx',
   './components/ExerciseGuideModal.tsx',
   './components/BodyMap.tsx',
+  './components/HowItWorksSlidesheet.tsx', // Added new component to cache
   // Icons as defined in manifest.json
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',

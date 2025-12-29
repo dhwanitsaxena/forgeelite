@@ -1,4 +1,5 @@
 
+
 import { ForgeData } from '../types';
 
 const LOCAL_STORAGE_KEY = 'forge_app_data';

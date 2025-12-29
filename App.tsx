@@ -5,11 +5,12 @@ import { saveToLocalStorage, loadFromLocalStorage } from './services/localStorag
 import M3Button from './components/M3Button';
 import PlanDisplay from './components/PlanDisplay';
 import BodyMap from './components/BodyMap';
+import HowItWorksSlidesheet from './components/HowItWorksSlidesheet'; // Import the new component
 // Removed ProjectionsDisplay and NavigationButtons imports as their content is now inlined for case 2.
 // import ProjectionsDisplay from './components/ProjectionsDisplay'; 
 // import NavigationButtons from './components/NavigationButtons';
 // Removed Muscle, Grip, HeartPulse due to import errors. Using available icons.
-import { User, Ruler, Target, UtensilsCrossed, ChevronRight, Loader2, Sparkles, Sun, Moon, Activity, Scaling, CircleCheck, Cake, Scale, Users, Dumbbell, Hand, Leaf, Cog, Award, Rocket, Plus, ChefHat, Zap, HeartPulse, RefreshCw, Lock, ArrowLeft } from 'lucide-react'; // Added Cog, removed Laptop, Added Award, Rocket, Plus, ChefHat, Zap, HeartPulse, RefreshCw, Lock, ArrowLeft
+import { User, Ruler, Target, UtensilsCrossed, ChevronRight, Loader2, Sparkles, Sun, Moon, Activity, Scaling, CircleCheck, Cake, Scale, Users, Dumbbell, Hand, Leaf, Cog, Award, Rocket, Plus, ChefHat, Zap, HeartPulse, RefreshCw, Lock, ArrowLeft, Info } from 'lucide-react'; // Added Info icon
 
 const StepperInput: React.FC<{
   label: string;
@@ -137,6 +138,7 @@ const App: React.FC = () => {
   const [loadingMessage, setLoadingMessage] = useState<string>("Analyzing your profile...");
   const [error, setError] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [showHowItWorks, setShowHowItWorks] = useState<boolean>(false); // New state for slidesheet
   // Removed [isChatOpen, setIsChatOpen] state
   
   const [profile, setProfile] = useState<UserProfile>({
@@ -244,6 +246,7 @@ const App: React.FC = () => {
   }, [isDarkMode]);
 
   const toggleTheme = () => setIsDarkMode(prev => !prev);
+  const toggleHowItWorks = () => setShowHowItWorks(prev => !prev); // New toggle function
   const handleNextStep = () => { setError(null); setStep(prev => prev + 1); }
   const handlePrevStep = () => { setError(null); setStep(prev => prev - 1); }
   const handleEditGoals = () => { setError(null); setStep(2); } // New handler to go to step 2
@@ -750,6 +753,11 @@ const App: React.FC = () => {
            <span className="font-bold text-sm uppercase tracking-tighter">Forge Elite</span>
         </div>
         <div className="flex items-center gap-3">
+          {/* How it Works Button */}
+          <button onClick={toggleHowItWorks} className="p-2 rounded-full bg-[var(--md-sys-color-secondary-container)] flex items-center gap-2 text-[var(--md-sys-color-on-secondary-container)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-primary)] transition-colors text-xs font-semibold uppercase tracking-tight">
+            <Info size={18} /> How it Works
+          </button>
+          {/* Dark/Light Mode Toggle */}
           <button onClick={toggleTheme} className="p-2 rounded-full bg-[var(--md-sys-color-secondary-container)]">{isDarkMode ? <Sun size={20} /> : <Moon size={20} />}</button>
         </div>
       </header>
@@ -758,6 +766,8 @@ const App: React.FC = () => {
         {renderStep()}
       </main>
       
+      {/* How it Works Slidesheet */}
+      <HowItWorksSlidesheet isOpen={showHowItWorks} onClose={toggleHowItWorks} />
       {/* Removed ChatBot button */}
       {/* Removed ChatBot component */}
     </div>
