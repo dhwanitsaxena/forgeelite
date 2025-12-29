@@ -395,14 +395,13 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                                 <span className="text-xs font-bold text-[var(--md-sys-color-on-surface-variant)] uppercase">{ex.rest} rest</span>
                               </div>
                               <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed italic mb-4">"{ex.tips}"</p>
-                              {profile.experienceLevel === ExperienceLevel.BEGINNER && (
-                                  <button 
-                                    onClick={() => setSelectedExercise(ex)} 
-                                    className="text-xs font-black uppercase text-orange-600 flex items-center gap-1.5 hover:opacity-60 transition-opacity"
-                                  >
-                                    <Youtube size={14} /> 
-                                  </button>
-                              )}
+                              {/* Removed profile.experienceLevel === ExperienceLevel.BEGINNER condition */}
+                              <button 
+                                onClick={() => setSelectedExercise(ex)} 
+                                className="text-xs font-black uppercase text-orange-600 flex items-center gap-1.5 hover:opacity-60 transition-opacity"
+                              >
+                                <Youtube size={14} /> 
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -428,15 +427,14 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                           </div>
                           <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed italic mb-4">"{ex.tips}"</p>
                           <div className="flex gap-4">
-                            {profile.experienceLevel === ExperienceLevel.BEGINNER && (
-                                <button 
-                                  disabled={isSwapping}
-                                  onClick={() => setSelectedExercise(ex)} 
-                                  className="text-xs font-black uppercase text-[var(--md-sys-color-primary)] flex items-center gap-1.5 hover:opacity-60 transition-opacity disabled:opacity-20"
-                                >
-                                  <Youtube size={14} /> 
-                                </button>
-                            )}
+                            {/* Removed profile.experienceLevel === ExperienceLevel.BEGINNER condition */}
+                            <button 
+                              disabled={isSwapping}
+                              onClick={() => setSelectedExercise(ex)} 
+                              className="text-xs font-black uppercase text-[var(--md-sys-color-primary)] flex items-center gap-1.5 hover:opacity-60 transition-opacity disabled:opacity-20"
+                            >
+                              <Youtube size={14} /> 
+                            </button>
                             <button 
                               disabled={isSwapping} 
                               onClick={() => handleSwapExercise(activeWorkoutCard, exIdx, ex, 'exercises')} 
@@ -472,14 +470,13 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                                  <span className="text-xs font-bold text-[var(--md-sys-color-on-surface-variant)] uppercase">{rehabEx.rest} rest</span>
                                </div>
                                <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed italic mb-4">"{rehabEx.tips}"</p>
-                               {profile.experienceLevel === ExperienceLevel.BEGINNER && (
-                                   <button 
-                                     onClick={() => setSelectedExercise(rehabEx)} 
-                                     className="text-xs font-black uppercase text-green-600 flex items-center gap-1.5 hover:opacity-60 transition-opacity"
-                                   >
-                                     <Youtube size={14} />
-                                   </button>
-                               )}
+                               {/* Removed profile.experienceLevel === ExperienceLevel.BEGINNER condition */}
+                               <button 
+                                 onClick={() => setSelectedExercise(rehabEx)} 
+                                 className="text-xs font-black uppercase text-green-600 flex items-center gap-1.5 hover:opacity-60 transition-opacity"
+                               >
+                                 <Youtube size={14} />
+                               </button>
                              </div>
                            </div>
                         ))}
@@ -508,14 +505,13 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                                 <span className="text-xs font-bold text-[var(--md-sys-color-on-surface-variant)] uppercase">{ex.rest} rest</span>
                               </div>
                               <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed italic mb-4">"{ex.tips}"</p>
-                              {profile.experienceLevel === ExperienceLevel.BEGINNER && (
-                                  <button 
-                                    onClick={() => setSelectedExercise(ex)} 
-                                    className="text-xs font-black uppercase text-blue-600 flex items-center gap-1.5 hover:opacity-60 transition-opacity"
-                                  >
-                                    <Youtube size={14} />
-                                  </button>
-                              )}
+                              {/* Removed profile.experienceLevel === ExperienceLevel.BEGINNER condition */}
+                              <button 
+                                onClick={() => setSelectedExercise(ex)} 
+                                className="text-xs font-black uppercase text-blue-600 flex items-center gap-1.5 hover:opacity-60 transition-opacity"
+                              >
+                                <Youtube size={14} />
+                              </button>
                             </div>
                           </div>
                         ))}
