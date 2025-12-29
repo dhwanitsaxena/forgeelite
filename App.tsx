@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { UserProfile, Gender, Goal, TransformationPlan, ProgressEntry, DietPreference, ExperienceLevel, ForgeData, SculptingTargetCategory } from './types';
 import { generateTransformationPlan } from './services/geminiService';
@@ -675,7 +674,7 @@ const App: React.FC = () => {
                   disabled={!customCuisineInput.trim()} 
                   className="!rounded-xl px-4 py-2 text-sm h-auto"
                 >
-                  <Plus size={16} /> Add
+                  <Plus size={16} /> {/* Removed "Add" label */}
                 </M3Button>
               </div>
               {profile.customCuisinePreferences && profile.customCuisinePreferences.length > 0 && (
@@ -755,7 +754,7 @@ const App: React.FC = () => {
         </div>
       </header>
       
-      <main className="flex-grow relative z-10 pb-12">
+      <main className="flex-grow relative z-10 pb-6">
         {renderStep()}
       </main>
       

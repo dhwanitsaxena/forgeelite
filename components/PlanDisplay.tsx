@@ -107,7 +107,6 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
       if (targetExercises[exerciseIndex]) {
         targetExercises[exerciseIndex] = updatedExercise;
         newDay[sectionType] = targetExercises;
-        newWorkoutPlan[dayIndex] = newDay;
         newPlan.workoutPlan = newWorkoutPlan;
         onUpdatePlanLocally(newPlan);
       }
@@ -280,11 +279,12 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                              {item.meal.name}
                            </h4>
                         </div>
-                        <div className="bg-[var(--md-sys-color-primary-container)] px-3 py-1 rounded-full">
-                          <span className="text-xs font-black text-[var(--md-sys-color-on-primary-container)]">{item.meal.calories} kcal</span>
-                        </div>
                     </div>
-                    <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] leading-relaxed mb-4 line-clamp-2">{item.meal.description}</p>
+                    {/* Calorie chip moved below meal title */}
+                    <div className="bg-[var(--md-sys-color-primary-container)] px-3 py-1 rounded-full w-fit mb-3">
+                      <span className="text-xs font-black text-[var(--md-sys-color-on-primary-container)]">{item.meal.calories} kcal</span>
+                    </div>
+                    <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] leading-relaxed">{item.meal.description}</p>
                  </div>
                </div>
              ))}
@@ -319,7 +319,7 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                  </h3>
                  <div className="space-y-3">
                    {currentDailyDietPlan.supplements.map((supplement, idx) => {
-                     const isPowder = supplement.toLowerCase().includes('powder') || supplement.toLowerCase().includes('creatine') || supplement.toLowerCase().includes('bcaa');
+                     const isPowder = supplement.toLowerCase().includes('powder') || supplement.toLowerCase().includes('creatine') || supplement.toLowerCase().includes('bcaa') || supplement.toLowerCase().includes('whey');
                      const SupplementIcon = isPowder ? Beaker : Pill;
                      return (
                        <div key={idx} className="flex items-start gap-4 p-4 bg-[var(--md-sys-color-secondary-container)] rounded-2xl">
@@ -400,8 +400,8 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                       <div className="space-y-4">
                         {alignedWorkoutPlan[activeWorkoutCard].warmUpExercises.map((ex, exIdx) => (
                           <div key={`warmup-${exIdx}`} className="flex items-start gap-5 group">
-                            <div className="shrink-0 w-14 h-14 rounded-[24px] flex items-center justify-center shadow-lg bg-orange-100 text-orange-600">
-                              <Flame size={24} />
+                            <div className="shrink-0 flex items-center justify-center"> {/* Subtle icon style */}
+                              <Flame size={28} className="text-orange-600" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <h5 className="font-black text-base uppercase tracking-tight text-[var(--md-sys-color-on-surface)] mb-2">
@@ -432,8 +432,8 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                     const isSwapping = swappingExercise === swapKey;
                     return (
                       <div key={exIdx} className={`flex items-start gap-5 group transition-opacity duration-300 ${isSwapping ? 'opacity-50' : 'opacity-100'}`}>
-                        <div className={`shrink-0 w-14 h-14 rounded-[24px] flex items-center justify-center shadow-lg transition-transform group-hover:scale-105 ${ex.isVariation ? 'bg-purple-100 text-purple-600' : 'bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-primary)]'}`}>
-                          {isSwapping ? <Loader2 size={24} className="animate-spin" /> : <Dumbbell size={24} />}
+                        <div className={`shrink-0 flex items-center justify-center transition-transform group-hover:scale-105 ${ex.isVariation ? 'text-purple-600' : 'text-[var(--md-sys-color-primary)]'}`}>
+                          {isSwapping ? <Loader2 size={28} className="animate-spin" /> : <Dumbbell size={28} />} {/* Subtle icon style */}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h5 className="font-black text-base uppercase tracking-tight text-[var(--md-sys-color-on-surface)] mb-2">
@@ -477,8 +477,8 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                       <div className="space-y-4">
                         {alignedWorkoutPlan[activeWorkoutCard].rehabExercises!.map((rehabEx, rehabExIdx) => (
                            <div key={`rehab-${rehabExIdx}`} className="flex items-start gap-5 group">
-                             <div className="shrink-0 w-14 h-14 rounded-[24px] flex items-center justify-center shadow-lg bg-green-100 text-green-600">
-                               <ShieldAlert size={24} />
+                             <div className="shrink-0 flex items-center justify-center"> {/* Subtle icon style */}
+                               <ShieldAlert size={28} className="text-green-600" />
                              </div>
                              <div className="flex-1 min-w-0">
                                <h5 className="font-black text-base uppercase tracking-tight text-[var(--md-sys-color-on-surface)] mb-2">
@@ -513,8 +513,8 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                       <div className="space-y-4">
                         {alignedWorkoutPlan[activeWorkoutCard].coolDownExercises.map((ex, exIdx) => (
                           <div key={`cooldown-${exIdx}`} className="flex items-start gap-5 group">
-                            <div className="shrink-0 w-14 h-14 rounded-[24px] flex items-center justify-center shadow-lg bg-blue-100 text-blue-600">
-                              <Rewind size={24} />
+                            <div className="shrink-0 flex items-center justify-center"> {/* Subtle icon style */}
+                              <Rewind size={28} className="text-blue-600" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <h5 className="font-black text-base uppercase tracking-tight text-[var(--md-sys-color-on-surface)] mb-2">
