@@ -452,7 +452,7 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                                   onClick={() => setSelectedExerciseData({ exercise: ex, dayIndex: activeWorkoutCard, exerciseIndex: exIdx, sectionType: 'exercises' })} 
                                   className="text-xs font-black uppercase text-[var(--md-sys-color-primary)] flex items-center gap-1.5 hover:opacity-60 transition-opacity disabled:opacity-20"
                                 >
-                                  <Play size={14} fill="currentColor" /> Form Guide
+                                  <Play size={14} fill="currentColor" /> Form
                                 </button>
                             )}
                             <button 
