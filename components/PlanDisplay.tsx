@@ -322,7 +322,7 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
         {activeTab === 'workout' && (
           <div className="space-y-6 animate-in fade-in duration-500">
             {/* Workout Carousel Controls */}
-            <div className="flex items-center justify-between px-4">
+            <div className="flex items-center justify-between px-4 mb-4">
               <button 
                 onClick={() => setActiveWorkoutCard(prev => (prev - 1 + alignedWorkoutPlan.length) % alignedWorkoutPlan.length)}
                 className="w-10 h-10 rounded-full bg-[var(--md-sys-color-secondary-container)] flex items-center justify-center text-[var(--md-sys-color-primary)] disabled:opacity-20 transition-all active:scale-90"
@@ -395,12 +395,11 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                                 <span className="text-xs font-bold text-[var(--md-sys-color-on-surface-variant)] uppercase">{ex.rest} rest</span>
                               </div>
                               <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed italic mb-4">"{ex.tips}"</p>
-                              {/* Removed profile.experienceLevel === ExperienceLevel.BEGINNER condition */}
                               <button 
                                 onClick={() => setSelectedExercise(ex)} 
                                 className="text-xs font-black uppercase text-orange-600 flex items-center gap-1.5 hover:opacity-60 transition-opacity"
                               >
-                                <Youtube size={14} /> 
+                                <Youtube size={14} /> Guide
                               </button>
                             </div>
                           </div>
@@ -427,13 +426,12 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                           </div>
                           <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed italic mb-4">"{ex.tips}"</p>
                           <div className="flex gap-4">
-                            {/* Removed profile.experienceLevel === ExperienceLevel.BEGINNER condition */}
                             <button 
                               disabled={isSwapping}
                               onClick={() => setSelectedExercise(ex)} 
                               className="text-xs font-black uppercase text-[var(--md-sys-color-primary)] flex items-center gap-1.5 hover:opacity-60 transition-opacity disabled:opacity-20"
                             >
-                              <Youtube size={14} /> 
+                              <Youtube size={14} /> Guide
                             </button>
                             <button 
                               disabled={isSwapping} 
@@ -470,12 +468,11 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                                  <span className="text-xs font-bold text-[var(--md-sys-color-on-surface-variant)] uppercase">{rehabEx.rest} rest</span>
                                </div>
                                <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed italic mb-4">"{rehabEx.tips}"</p>
-                               {/* Removed profile.experienceLevel === ExperienceLevel.BEGINNER condition */}
                                <button 
                                  onClick={() => setSelectedExercise(rehabEx)} 
                                  className="text-xs font-black uppercase text-green-600 flex items-center gap-1.5 hover:opacity-60 transition-opacity"
                                >
-                                 <Youtube size={14} />
+                                 <Youtube size={14} /> Guide
                                </button>
                              </div>
                            </div>
@@ -505,12 +502,11 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                                 <span className="text-xs font-bold text-[var(--md-sys-color-on-surface-variant)] uppercase">{ex.rest} rest</span>
                               </div>
                               <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed italic mb-4">"{ex.tips}"</p>
-                              {/* Removed profile.experienceLevel === ExperienceLevel.BEGINNER condition */}
                               <button 
                                 onClick={() => setSelectedExercise(ex)} 
                                 className="text-xs font-black uppercase text-blue-600 flex items-center gap-1.5 hover:opacity-60 transition-opacity"
                               >
-                                <Youtube size={14} />
+                                <Youtube size={14} /> Guide
                               </button>
                             </div>
                           </div>
