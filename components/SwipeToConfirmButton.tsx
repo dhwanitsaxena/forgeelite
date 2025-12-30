@@ -78,9 +78,9 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
     }
 
     if (containerWidth > 0 && translateX >= containerWidth * dragThreshold) {
-      onConfirm();
+      onConfirm(); // Trigger confirmation directly here
     }
-    resetHandle();
+    resetHandle(); // Always reset the handle after drag ends
   }, [isDragging, disabled, containerWidth, translateX, dragThreshold, onConfirm, resetHandle]);
 
   // Mouse event handlers
