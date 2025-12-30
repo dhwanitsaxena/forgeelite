@@ -128,7 +128,7 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
         ref={handleRef}
         className={`absolute h-full aspect-square rounded-full flex items-center justify-center shadow-lg
                     transition-transform duration-300 ease-in-out 
-                    ${isConfirmedState ? 'bg-white text-white' : 'bg-[var(--md-sys-color-primary)] text-white'}`}
+                    ${isConfirmedState ? 'bg-white text-green-600' : 'bg-white text-green-600'}`}
         style={{ transform: `translateX(${translateX}px)` }}
       >
         {isConfirmedState ? <CheckCircle2 size={24} /> : <ChevronRight size={24} />}
