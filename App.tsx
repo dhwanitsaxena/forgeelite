@@ -178,6 +178,7 @@ const App: React.FC = () => {
   const [weekNumber, setWeekNumber] = useState(1);
   const [progressHistory, setProgressHistory] = useState<ProgressEntry[]>([]);
   const [customCuisineInput, setCustomCuisineInput] = useState(''); // State for custom cuisine input
+  const [currentDayOfWeekIndex, setCurrentDayOfWeekIndex] = useState<number>(new Date().getDay()); // Default to today's actual day of week
 
   // Load data from local storage on initial mount
   useEffect(() => {
@@ -188,6 +189,7 @@ const App: React.FC = () => {
       setPlan(localData.plan);
       setWeekNumber(localData.weekNumber);
       setProgressHistory(localData.progressHistory);
+      setCurrentDayOfWeekIndex(localData.currentDayOfWeekIndex || new Date().getDay()); // Load or default
       setStep(100); // Jump to plan display if data found
     } else {
       setStep(0); // Show landing page if no local data
@@ -197,11 +199,11 @@ const App: React.FC = () => {
   // Save data to local storage whenever relevant state changes
   useEffect(() => {
     if (step === 100) { // Only save when the user is past onboarding
-      const dataToSave: ForgeData = { profile, plan, weekNumber, progressHistory };
+      const dataToSave: ForgeData = { profile, plan, weekNumber, progressHistory, currentDayOfWeekIndex }; // Include new state
       const timeoutId = setTimeout(() => saveToLocalStorage(dataToSave), 500); // Debounce save
       return () => clearTimeout(timeoutId);
     }
-  }, [profile, plan, weekNumber, progressHistory, step]);
+  }, [profile, plan, weekNumber, progressHistory, currentDayOfWeekIndex, step]);
 
   // BFP Calculation
   useEffect(() => {
@@ -323,6 +325,13 @@ const App: React.FC = () => {
     // For now, just trigger a plan refresh for the next week.
     handleRefreshPlan(); // Refresh plan with updated progress
   };
+
+  const handleWorkoutComplete = useCallback(() => {
+    // Advance to the next day of the week
+    const nextDayIndex = (currentDayOfWeekIndex + 1) % 7;
+    setCurrentDayOfWeekIndex(nextDayIndex);
+    // The PlanDisplay will re-render and align itself to this new day
+  }, [currentDayOfWeekIndex]);
 
 
   const renderStep = () => {
@@ -739,6 +748,8 @@ const App: React.FC = () => {
               onUpdatePlanLocally={(p) => setPlan(p)}
               isRefreshing={loading}
               onEditGoals={handleEditGoals} // Pass the new handler
+              currentDayOfWeekIndex={currentDayOfWeekIndex} // Pass new prop
+              onWorkoutComplete={handleWorkoutComplete}     // Pass new handler
             />
           </div>
         ) : null;

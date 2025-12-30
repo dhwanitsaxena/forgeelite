@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { TransformationPlan, Goal, ProgressEntry, UserProfile, Exercise, WorkoutDay, Meal, DietPlan, ExperienceLevel } from '../types';
-import { Utensils, Dumbbell, Zap, ChevronRight, ChevronLeft, Info, LineChart, AlertTriangle, Book, Loader2, Heart, Eye, Shuffle, ArrowRightLeft, Sparkles, ShieldAlert, HeartPulse, Send, Pill, Beaker, Play, Activity, Target, Calendar, Apple, Pencil, Sunrise, Sun, Moon, Footprints, Flame, Rewind, Youtube } from 'lucide-react'; // Added Youtube
+import { Utensils, Dumbbell, Zap, ChevronRight, ChevronLeft, Info, LineChart, AlertTriangle, Book, Loader2, Heart, Eye, Shuffle, ArrowRightLeft, Sparkles, ShieldAlert, HeartPulse, Send, Pill, Beaker, Play, Activity, Target, Calendar, Apple, Pencil, Sunrise, Sun, Moon, Footprints, Flame, Rewind, Youtube, CircleCheck } from 'lucide-react'; // Added Youtube, CircleCheck
 import ProgressTracker from './ProgressTracker';
 import M3Button from './M3Button';
 import ExerciseGuideModal from './ExerciseGuideModal';
@@ -18,6 +18,8 @@ interface PlanDisplayProps {
   onUpdatePlanLocally: (updatedPlan: TransformationPlan) => void;
   isRefreshing: boolean;
   onEditGoals: () => void; // New prop for editing goals
+  currentDayOfWeekIndex: number; // New prop: The actual tracked day of the week (0-6)
+  onWorkoutComplete: () => void; // New prop: Callback to advance the workout day
 }
 
 // Define the daysOfWeek array, starting with Sunday (index 0) to match Date.getDay()
@@ -32,36 +34,62 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
   onRefreshPlan,
   onUpdatePlanLocally,
   isRefreshing,
-  onEditGoals // Destructure new prop
+  onEditGoals, // Destructure new prop
+  currentDayOfWeekIndex, // Destructure new prop
+  onWorkoutComplete // Destructure new prop
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'diet' | 'workout' | 'progress'>('overview');
   // Updated state to hold exercise data along with its indices and sectionType
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null); // Simplified state
   const [swappingExercise, setSwappingExercise] = useState<string | null>(null);
-  const [activeWorkoutCard, setActiveWorkoutCard] = useState(0); // Initialize to 0, alignedWorkoutPlan[0] is always "today"
+  const [activeWorkoutCard, setActiveWorkoutCard] = useState(0); // Initialize to 0
   const [activeDietDayIndex, setActiveDietDayIndex] = useState(0); // New state for daily diet plan
+  const [showCompletionToast, setShowCompletionToast] = useState(false); // For local toast
 
-  // Effect to set activeDietDayIndex to today's actual day on initial load
+  // Effect to set activeDietDayIndex to the current tracked day on initial load and day change
   useEffect(() => {
-    const todayIndex = new Date().getDay(); // 0 for Sunday, 1 for Monday, etc.
-    setActiveDietDayIndex(todayIndex); // Align diet plan to today's day
-  }, []);
+    setActiveDietDayIndex(currentDayOfWeekIndex); 
+  }, [currentDayOfWeekIndex]);
 
-  // Re-align the workout plan so "Day 1" of the AI plan starts "Today"
+  // Re-align the workout plan so that the "currentDayOfWeekIndex" is at position 0 in the display cycle
   const alignedWorkoutPlan = useMemo(() => {
-    if (!plan.workoutPlan) return [];
-    
-    const todayIndex = new Date().getDay(); // 0 for Sunday, 1 for Monday, etc.
-    
-    return plan.workoutPlan.map((dayData, index) => {
-      const realDayIndex = (todayIndex + index) % 7;
-      return {
-        ...dayData,
-        actualDayName: daysOfWeek[realDayIndex],
-        isToday: index === 0
-      };
+    if (!plan.workoutPlan || plan.workoutPlan.length !== 7) return [];
+
+    // Map `plan.workoutPlan` days (e.g., 'Monday') to their actual `daysOfWeek` indices
+    const planDayNameToIndex = plan.workoutPlan.map(item => daysOfWeek.indexOf(item.day));
+
+    // Find the starting index in `plan.workoutPlan` that matches `currentDayOfWeekIndex`
+    let startIndexInPlan = planDayNameToIndex.indexOf(currentDayOfWeekIndex);
+
+    // Fallback if current day is not explicitly in the plan (shouldn't happen with 7 days, but for robustness)
+    if (startIndexInPlan === -1) {
+        startIndexInPlan = 0;
+        console.warn(`Workout plan doesn't contain a day for currentDayOfWeekIndex ${currentDayOfWeekIndex}. Defaulting to first plan day.`);
+    }
+
+    // Create a rotated version of the workout plan
+    const rotatedPlan = [
+        ...plan.workoutPlan.slice(startIndexInPlan),
+        ...plan.workoutPlan.slice(0, startIndexInPlan)
+    ];
+
+    // Now map the rotated plan to include `actualDayName` and `isToday`
+    return rotatedPlan.map((dayData, index) => {
+        // The actual day name is derived from the *original* `daysOfWeek` array based on `currentDayOfWeekIndex`
+        // shifted by `index` within the rotated plan.
+        const realDayIndex = (currentDayOfWeekIndex + index) % 7;
+        return {
+            ...dayData,
+            actualDayName: daysOfWeek[realDayIndex],
+            isToday: index === 0 // The first element of the rotated plan is "today"
+        };
     });
-  }, [plan.workoutPlan]);
+  }, [plan.workoutPlan, currentDayOfWeekIndex]);
+
+  // Reset activeWorkoutCard to 0 whenever the currentDayOfWeekIndex changes
+  useEffect(() => {
+      setActiveWorkoutCard(0); 
+  }, [currentDayOfWeekIndex, alignedWorkoutPlan.length]);
 
   type ExerciseSection = 'warmUpExercises' | 'exercises' | 'rehabExercises' | 'coolDownExercises';
 
@@ -95,6 +123,15 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
     }
   };
 
+  const handleMarkSessionComplete = () => {
+    // Only allow marking complete for the actual "current" day (index 0 of aligned plan)
+    if (activeWorkoutCard === 0) {
+      onWorkoutComplete(); // Call parent handler to advance the day
+      setShowCompletionToast(true); // Show local toast
+      setTimeout(() => setShowCompletionToast(false), 3000); // Hide after 3 seconds
+    }
+  };
+
   // Helper function to clean exercise names (remove content in parentheses)
   const cleanExerciseName = (name: string): string => {
     return name.replace(/\s*\(.*?\)\s*/g, '').trim();
@@ -116,6 +153,12 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
 
   return (
     <div className="max-w-md mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {showCompletionToast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[120] bg-green-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-500">
+          <CircleCheck size={20} />
+          <span className="font-semibold">Workout Session Completed! Great job!</span>
+        </div>
+      )}
       
       {/* Transformation Timeline Header */}
       <div className="bg-[var(--md-sys-color-surface)] p-6 rounded-[32px] border border-[var(--md-sys-color-outline)]/10 shadow-sm mb-6 animate-in slide-in-from-top-4">
@@ -513,6 +556,22 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                         ))}
                       </div>
                     </div>
+                  )}
+
+                  {/* Mark Session Complete Button */}
+                  {alignedWorkoutPlan[activeWorkoutCard].isToday ? (
+                      <M3Button 
+                          onClick={handleMarkSessionComplete} 
+                          fullWidth 
+                          variant="filled" 
+                          className="!h-14 !text-lg !font-bold mt-8 !bg-green-600 hover:!bg-green-700 shadow-xl"
+                      >
+                          <CircleCheck size={24} /> Mark Session Complete
+                      </M3Button>
+                  ) : (
+                      <div className="text-center text-sm text-gray-500 mt-8 py-2">
+                          View only. Complete today's session to advance!
+                      </div>
                   )}
 
                   {/* Daily Steps Recommendation Card */}
