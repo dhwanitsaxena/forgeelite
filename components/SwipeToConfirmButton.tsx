@@ -29,6 +29,7 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
     const observer = new ResizeObserver(entries => {
       const { width } = entries[0].contentRect;
       setContainerWidth(width);
+      console.log('ResizeObserver: containerWidth set to', width);
     });
 
     observer.observe(currentContainer);
@@ -43,21 +44,32 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
   const resetHandle = useCallback(() => {
     setTranslateX(0);
     setIsDragging(false);
+    console.log('Reset Handle: translateX reset to 0, isDragging set to false');
   }, []);
 
   const handleDragStart = useCallback((clientX: number) => {
-    if (disabled) return;
+    if (disabled) {
+      console.log('Drag Start: Disabled, returning.');
+      return;
+    }
     setIsDragging(true);
     initialClientXRef.current = clientX;
     initialTranslateXRef.current = translateX;
     if (handleRef.current) {
       handleRef.current.style.transition = 'none'; // Disable transition during drag
     }
+    console.log('Drag Start:', { clientX, initialTranslateX: initialTranslateXRef.current, isDragging: true });
   }, [disabled, translateX]);
 
   const handleDragMove = useCallback((clientX: number) => {
-    if (!isDragging || disabled) return;
-    if (containerWidth === 0 || !handleRef.current) return;
+    if (!isDragging || disabled) {
+      // console.log('Drag Move: Not dragging or disabled, returning.'); // Too verbose for console
+      return;
+    }
+    if (containerWidth === 0 || !handleRef.current) {
+      console.warn('Drag Move: containerWidth is 0 or handleRef.current is null.');
+      return;
+    }
 
     const handleWidth = handleRef.current.offsetWidth;
     
@@ -66,18 +78,36 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
     
     newTranslateX = Math.max(0, Math.min(newTranslateX, containerWidth - handleWidth));
     setTranslateX(newTranslateX);
+    console.log('Drag Move:', { clientX, deltaX, newTranslateX: newTranslateX.toFixed(2), containerWidth, handleWidth });
   }, [isDragging, disabled, containerWidth]);
 
   const handleDragEnd = useCallback(() => {
-    if (!isDragging || disabled) return;
+    if (!isDragging || disabled) {
+      console.log('Drag End: Not dragging or disabled, returning.');
+      return;
+    }
     if (handleRef.current) {
       handleRef.current.style.transition = 'transform 0.3s ease-in-out, background-color 0.3s ease-in-out';
     }
 
-    if (containerWidth > 0 && translateX >= containerWidth * dragThreshold) {
+    const isConfirmed = containerWidth > 0 && translateX >= containerWidth * dragThreshold;
+    console.log('Drag End Summary:', {
+      finalTranslateX: translateX.toFixed(2),
+      containerWidth,
+      dragThreshold,
+      thresholdPixels: (containerWidth * dragThreshold).toFixed(2),
+      isConfirmed,
+      isDragging,
+      disabled
+    });
+
+    if (isConfirmed) {
+      console.log('CONFIRMED! Calling onConfirm()');
       onConfirm();
+    } else {
+      console.log('NOT CONFIRMED. Resetting handle to start position.');
     }
-    resetHandle();
+    resetHandle(); // Always reset the handle after drag ends
   }, [isDragging, disabled, containerWidth, translateX, dragThreshold, onConfirm, resetHandle]);
 
   useEffect(() => {
@@ -106,14 +136,18 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
     // Touch event handlers
     const onTouchStart = (e: TouchEvent) => {
       if (disabled) return;
-      e.preventDefault(); // This is crucial to prevent default scrolling on touch devices
+      // This is crucial to prevent default scrolling on touch devices for the start of the drag
+      e.preventDefault(); 
+      console.log('Touch Start event triggered.');
       handleDragStart(e.touches[0].clientX);
-      document.addEventListener('touchmove', onTouchMove, { passive: false }); // Ensure touchmove can also preventDefault
+      // Ensure touchmove is also non-passive to allow e.preventDefault() during drag
+      document.addEventListener('touchmove', onTouchMove, { passive: false }); 
       document.addEventListener('touchend', onTouchEnd);
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      e.preventDefault(); // Prevent scrolling during drag
+      // Prevent scrolling during drag
+      e.preventDefault(); 
       handleDragMove(e.touches[0].clientX);
     };
 
@@ -123,8 +157,8 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
       handleDragEnd();
     };
 
-    // Attach native event listeners to the container
-    currentContainer.addEventListener('mousedown', onMouseDown, { passive: false }); // Mouse down also set to passive: false for consistency
+    // Attach native event listeners to the container with passive: false for touch events
+    currentContainer.addEventListener('mousedown', onMouseDown, { passive: false });
     currentContainer.addEventListener('touchstart', onTouchStart, { passive: false });
 
     return () => {
@@ -133,6 +167,7 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
         currentContainer.removeEventListener('touchstart', onTouchStart);
       }
       // Ensure document-level listeners are cleaned up if component unmounts mid-drag
+      // or if drag ends without the cleanup in onMouseUp/onTouchEnd (e.g. error)
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
       document.removeEventListener('touchmove', onTouchMove);
