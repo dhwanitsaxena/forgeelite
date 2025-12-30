@@ -21,11 +21,25 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
 
   const dragThreshold = 0.7; // 70% of the container width to confirm
 
+  // Use ResizeObserver for robust container width tracking
   useEffect(() => {
-    if (containerRef.current) {
-      setContainerWidth(containerRef.current.offsetWidth);
-    }
-  }, []);
+    const currentContainer = containerRef.current;
+    if (!currentContainer) return;
+
+    const observer = new ResizeObserver(entries => {
+      // We only expect one entry for the observed element
+      const { width } = entries[0].contentRect;
+      setContainerWidth(width);
+    });
+
+    observer.observe(currentContainer);
+
+    return () => {
+      if (currentContainer) {
+        observer.unobserve(currentContainer);
+      }
+    };
+  }, []); // Empty dependency array means this runs once on mount and cleans up on unmount
 
   const resetHandle = useCallback(() => {
     setTranslateX(0);
@@ -44,18 +58,18 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
 
   const handleDragMove = useCallback((clientX: number) => {
     if (!isDragging || disabled) return;
-    if (containerRef.current && handleRef.current) {
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const handleWidth = handleRef.current.offsetWidth;
-      
-      const deltaX = clientX - initialClientXRef.current;
-      let newTranslateX = initialTranslateXRef.current + deltaX;
-      
-      // Ensure handle stays within bounds (0 to containerWidth - handleWidth)
-      newTranslateX = Math.max(0, Math.min(newTranslateX, containerRect.width - handleWidth));
-      setTranslateX(newTranslateX);
-    }
-  }, [isDragging, disabled]);
+    if (containerWidth === 0 || !handleRef.current) return; // Prevent division by zero or errors if refs are not ready
+
+    const handleWidth = handleRef.current.offsetWidth;
+    
+    const deltaX = clientX - initialClientXRef.current;
+    let newTranslateX = initialTranslateXRef.current + deltaX;
+    
+    // Ensure handle stays within bounds (0 to containerWidth - handleWidth)
+    // The max value for translateX is when the right edge of the handle aligns with the right edge of the container.
+    newTranslateX = Math.max(0, Math.min(newTranslateX, containerWidth - handleWidth));
+    setTranslateX(newTranslateX);
+  }, [isDragging, disabled, containerWidth]); // Added containerWidth to dependencies
 
   const handleDragEnd = useCallback(() => {
     if (!isDragging || disabled) return;
