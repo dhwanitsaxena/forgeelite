@@ -565,7 +565,7 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                           onConfirm={handleSessionCompletionConfirmed} 
                           className="mt-8 !bg-green-600 hover:!bg-green-700 shadow-xl"
                       >
-                          <CircleCheck size={24} /> Mark Session Complete
+                          <CircleCheck size={24} /> Swipe to Mark Session Complete
                       </SwipeToConfirmButton>
                   ) : alignedWorkoutPlan[activeWorkoutCard].isToday && isTodayWorkoutCompleted ? (
                       <div className="text-center text-sm font-bold text-green-600 mt-8 py-3 bg-green-100 rounded-full flex items-center justify-center gap-2">
