@@ -19,6 +19,7 @@ const urlsToCache = [
   './components/ExerciseGuideModal.tsx',
   './components/BodyMap.tsx',
   './components/HowItWorksSlidesheet.tsx', // Added new component to cache
+  './components/SwipeToConfirmButton.tsx', // Added SwipeToConfirmButton to cache
   // Icons as defined in manifest.json
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',

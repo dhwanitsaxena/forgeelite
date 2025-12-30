@@ -71,7 +71,8 @@ export interface ForgeData {
   plan: TransformationPlan | null;
   weekNumber: number;
   progressHistory: ProgressEntry[];
-  currentDayOfWeekIndex: number; // New field for persisting the active day of the week for workouts/diet
+  actualDayOfWeekIndex: number; // Renamed to clarify it's the actual day of the week
+  completedWorkouts: Record<string, boolean>; // New field for persisting completed workout days (YYYY-MM-DD -> boolean)
 }
 
 export interface Meal {

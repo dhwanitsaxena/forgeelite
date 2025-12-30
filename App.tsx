@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { UserProfile, Gender, Goal, TransformationPlan, ProgressEntry, DietPreference, ExperienceLevel, ForgeData, SculptingTargetCategory } from './types';
 import { generateTransformationPlan } from './services/geminiService';
@@ -140,7 +141,6 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [showHowItWorks, setShowHowItWorks] = useState<boolean>(false); // New state for slidesheet
-  // Removed [isChatOpen, setIsChatOpen] state
   
   const [profile, setProfile] = useState<UserProfile>({
     age: 25,
@@ -178,7 +178,11 @@ const App: React.FC = () => {
   const [weekNumber, setWeekNumber] = useState(1);
   const [progressHistory, setProgressHistory] = useState<ProgressEntry[]>([]);
   const [customCuisineInput, setCustomCuisineInput] = useState(''); // State for custom cuisine input
-  const [currentDayOfWeekIndex, setCurrentDayOfWeekIndex] = useState<number>(new Date().getDay()); // Default to today's actual day of week
+  
+  // Renamed from currentDayOfWeekIndex to actualDayOfWeekIndex
+  const [actualDayOfWeekIndex, setActualDayOfWeekIndex] = useState<number>(new Date().getDay()); // Default to today's actual day of week
+  // New state for completed workouts, keyed by YYYY-MM-DD
+  const [completedWorkouts, setCompletedWorkouts] = useState<Record<string, boolean>>({});
 
   // Load data from local storage on initial mount
   useEffect(() => {
@@ -189,7 +193,9 @@ const App: React.FC = () => {
       setPlan(localData.plan);
       setWeekNumber(localData.weekNumber);
       setProgressHistory(localData.progressHistory);
-      setCurrentDayOfWeekIndex(localData.currentDayOfWeekIndex || new Date().getDay()); // Load or default
+      // Load actualDayOfWeekIndex, defaulting to current day if not present or invalid
+      setActualDayOfWeekIndex(localData.actualDayOfWeekIndex ?? new Date().getDay()); 
+      setCompletedWorkouts(localData.completedWorkouts || {}); // Load completedWorkouts or default to empty object
       setStep(100); // Jump to plan display if data found
     } else {
       setStep(0); // Show landing page if no local data
@@ -199,11 +205,11 @@ const App: React.FC = () => {
   // Save data to local storage whenever relevant state changes
   useEffect(() => {
     if (step === 100) { // Only save when the user is past onboarding
-      const dataToSave: ForgeData = { profile, plan, weekNumber, progressHistory, currentDayOfWeekIndex }; // Include new state
+      const dataToSave: ForgeData = { profile, plan, weekNumber, progressHistory, actualDayOfWeekIndex, completedWorkouts }; // Include new states
       const timeoutId = setTimeout(() => saveToLocalStorage(dataToSave), 500); // Debounce save
       return () => clearTimeout(timeoutId);
     }
-  }, [profile, plan, weekNumber, progressHistory, currentDayOfWeekIndex, step]);
+  }, [profile, plan, weekNumber, progressHistory, actualDayOfWeekIndex, completedWorkouts, step]);
 
   // BFP Calculation
   useEffect(() => {
@@ -326,13 +332,12 @@ const App: React.FC = () => {
     handleRefreshPlan(); // Refresh plan with updated progress
   };
 
-  const handleWorkoutComplete = useCallback(() => {
-    // Advance to the next day of the week
-    const nextDayIndex = (currentDayOfWeekIndex + 1) % 7;
-    setCurrentDayOfWeekIndex(nextDayIndex);
-    // The PlanDisplay will re-render and align itself to this new day
-  }, [currentDayOfWeekIndex]);
-
+  // Renamed to clarify its purpose: marking the workout for the *current calendar day* as complete
+  const handleMarkDayWorkoutComplete = useCallback(() => {
+    const todayKey = new Date().toISOString().slice(0, 10); // Format YYYY-MM-DD
+    setCompletedWorkouts(prev => ({ ...prev, [todayKey]: true }));
+    // Do NOT advance actualDayOfWeekIndex here. It reflects the current real day.
+  }, []); // No dependencies that would cause it to change after being set up
 
   const renderStep = () => {
     switch (step) {
@@ -748,8 +753,9 @@ const App: React.FC = () => {
               onUpdatePlanLocally={(p) => setPlan(p)}
               isRefreshing={loading}
               onEditGoals={handleEditGoals} // Pass the new handler
-              currentDayOfWeekIndex={currentDayOfWeekIndex} // Pass new prop
-              onWorkoutComplete={handleWorkoutComplete}     // Pass new handler
+              actualDayOfWeekIndex={actualDayOfWeekIndex} // Pass renamed prop
+              completedWorkouts={completedWorkouts}       // Pass new prop
+              onMarkDayWorkoutComplete={handleMarkDayWorkoutComplete} // Pass renamed handler
             />
           </div>
         ) : null;
@@ -780,8 +786,6 @@ const App: React.FC = () => {
       
       {/* How it Works Slidesheet */}
       <HowItWorksSlidesheet isOpen={showHowItWorks} onClose={toggleHowItWorks} />
-      {/* Removed ChatBot button */}
-      {/* Removed ChatBot component */}
     </div>
   );
 };

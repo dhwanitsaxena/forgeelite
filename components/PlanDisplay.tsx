@@ -6,6 +6,7 @@ import ProgressTracker from './ProgressTracker';
 import M3Button from './M3Button';
 import ExerciseGuideModal from './ExerciseGuideModal';
 import { getAlternativeExercise } from '../services/geminiService';
+import SwipeToConfirmButton from './SwipeToConfirmButton'; // Import the new swipe component
 
 interface PlanDisplayProps {
   plan: TransformationPlan;
@@ -18,8 +19,9 @@ interface PlanDisplayProps {
   onUpdatePlanLocally: (updatedPlan: TransformationPlan) => void;
   isRefreshing: boolean;
   onEditGoals: () => void; // New prop for editing goals
-  currentDayOfWeekIndex: number; // New prop: The actual tracked day of the week (0-6)
-  onWorkoutComplete: () => void; // New prop: Callback to advance the workout day
+  actualDayOfWeekIndex: number; // Renamed prop: The actual tracked day of the week (0-6)
+  completedWorkouts: Record<string, boolean>; // New prop: Map of YYYY-MM-DD to completion status
+  onMarkDayWorkoutComplete: () => void; // New prop: Callback to mark the current day's workout complete
 }
 
 // Define the daysOfWeek array, starting with Sunday (index 0) to match Date.getDay()
@@ -34,37 +36,37 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
   onRefreshPlan,
   onUpdatePlanLocally,
   isRefreshing,
-  onEditGoals, // Destructure new prop
-  currentDayOfWeekIndex, // Destructure new prop
-  onWorkoutComplete // Destructure new prop
+  onEditGoals, 
+  actualDayOfWeekIndex, // Destructure renamed prop
+  completedWorkouts, // Destructure new prop
+  onMarkDayWorkoutComplete // Destructure new prop
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'diet' | 'workout' | 'progress'>('overview');
-  // Updated state to hold exercise data along with its indices and sectionType
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null); // Simplified state
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null); 
   const [swappingExercise, setSwappingExercise] = useState<string | null>(null);
-  const [activeWorkoutCard, setActiveWorkoutCard] = useState(0); // Initialize to 0
-  const [activeDietDayIndex, setActiveDietDayIndex] = useState(0); // New state for daily diet plan
-  const [showCompletionToast, setShowCompletionToast] = useState(false); // For local toast
+  const [activeWorkoutCard, setActiveWorkoutCard] = useState(0); 
+  const [activeDietDayIndex, setActiveDietDayIndex] = useState(0); 
+  const [showCompletionToast, setShowCompletionToast] = useState(false); 
 
   // Effect to set activeDietDayIndex to the current tracked day on initial load and day change
   useEffect(() => {
-    setActiveDietDayIndex(currentDayOfWeekIndex); 
-  }, [currentDayOfWeekIndex]);
+    setActiveDietDayIndex(actualDayOfWeekIndex); 
+  }, [actualDayOfWeekIndex]);
 
-  // Re-align the workout plan so that the "currentDayOfWeekIndex" is at position 0 in the display cycle
+  // Re-align the workout plan so that the "actualDayOfWeekIndex" is at position 0 in the display cycle
   const alignedWorkoutPlan = useMemo(() => {
     if (!plan.workoutPlan || plan.workoutPlan.length !== 7) return [];
 
     // Map `plan.workoutPlan` days (e.g., 'Monday') to their actual `daysOfWeek` indices
     const planDayNameToIndex = plan.workoutPlan.map(item => daysOfWeek.indexOf(item.day));
 
-    // Find the starting index in `plan.workoutPlan` that matches `currentDayOfWeekIndex`
-    let startIndexInPlan = planDayNameToIndex.indexOf(currentDayOfWeekIndex);
+    // Find the starting index in `plan.workoutPlan` that matches `actualDayOfWeekIndex`
+    let startIndexInPlan = planDayNameToIndex.indexOf(actualDayOfWeekIndex);
 
     // Fallback if current day is not explicitly in the plan (shouldn't happen with 7 days, but for robustness)
     if (startIndexInPlan === -1) {
         startIndexInPlan = 0;
-        console.warn(`Workout plan doesn't contain a day for currentDayOfWeekIndex ${currentDayOfWeekIndex}. Defaulting to first plan day.`);
+        console.warn(`Workout plan doesn't contain a day for actualDayOfWeekIndex ${actualDayOfWeekIndex}. Defaulting to first plan day.`);
     }
 
     // Create a rotated version of the workout plan
@@ -75,21 +77,21 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
 
     // Now map the rotated plan to include `actualDayName` and `isToday`
     return rotatedPlan.map((dayData, index) => {
-        // The actual day name is derived from the *original* `daysOfWeek` array based on `currentDayOfWeekIndex`
+        // The actual day name is derived from the *original* `daysOfWeek` array based on `actualDayOfWeekIndex`
         // shifted by `index` within the rotated plan.
-        const realDayIndex = (currentDayOfWeekIndex + index) % 7;
+        const realDayIndex = (actualDayOfWeekIndex + index) % 7;
         return {
             ...dayData,
             actualDayName: daysOfWeek[realDayIndex],
             isToday: index === 0 // The first element of the rotated plan is "today"
         };
     });
-  }, [plan.workoutPlan, currentDayOfWeekIndex]);
+  }, [plan.workoutPlan, actualDayOfWeekIndex]);
 
-  // Reset activeWorkoutCard to 0 whenever the currentDayOfWeekIndex changes
+  // Reset activeWorkoutCard to 0 whenever the actualDayOfWeekIndex changes (i.e., new calendar day)
   useEffect(() => {
       setActiveWorkoutCard(0); 
-  }, [currentDayOfWeekIndex, alignedWorkoutPlan.length]);
+  }, [actualDayOfWeekIndex]); // Depend only on actualDayOfWeekIndex for this reset
 
   type ExerciseSection = 'warmUpExercises' | 'exercises' | 'rehabExercises' | 'coolDownExercises';
 
@@ -123,13 +125,10 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
     }
   };
 
-  const handleMarkSessionComplete = () => {
-    // Only allow marking complete for the actual "current" day (index 0 of aligned plan)
-    if (activeWorkoutCard === 0) {
-      onWorkoutComplete(); // Call parent handler to advance the day
-      setShowCompletionToast(true); // Show local toast
-      setTimeout(() => setShowCompletionToast(false), 3000); // Hide after 3 seconds
-    }
+  const handleSessionCompletionConfirmed = () => {
+    onMarkDayWorkoutComplete(); // Call parent handler to mark the day's workout complete
+    setShowCompletionToast(true); // Show local toast
+    setTimeout(() => setShowCompletionToast(false), 3000); // Hide after 3 seconds
   };
 
   // Helper function to clean exercise names (remove content in parentheses)
@@ -150,6 +149,8 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
 
   const transformationProgress = Math.min(100, (currentWeek / (plan.estimatedWeeks || 12)) * 100);
   const currentDailyDietPlan = plan.dailyDietPlans[activeDietDayIndex] || plan.dailyDietPlans[0];
+  const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const isTodayWorkoutCompleted = completedWorkouts[todayKey];
 
   return (
     <div className="max-w-md mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -558,16 +559,18 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                     </div>
                   )}
 
-                  {/* Mark Session Complete Button */}
-                  {alignedWorkoutPlan[activeWorkoutCard].isToday ? (
-                      <M3Button 
-                          onClick={handleMarkSessionComplete} 
-                          fullWidth 
-                          variant="filled" 
-                          className="!h-14 !text-lg !font-bold mt-8 !bg-green-600 hover:!bg-green-700 shadow-xl"
+                  {/* Mark Session Complete Button (now SwipeToConfirmButton) */}
+                  {alignedWorkoutPlan[activeWorkoutCard].isToday && !isTodayWorkoutCompleted ? (
+                      <SwipeToConfirmButton 
+                          onConfirm={handleSessionCompletionConfirmed} 
+                          className="mt-8 !bg-green-600 hover:!bg-green-700 shadow-xl"
                       >
-                          <CircleCheck size={24} /> Mark Session Complete
-                      </M3Button>
+                          <CircleCheck size={24} /> Swipe to Mark Session Complete
+                      </SwipeToConfirmButton>
+                  ) : alignedWorkoutPlan[activeWorkoutCard].isToday && isTodayWorkoutCompleted ? (
+                      <div className="text-center text-sm font-bold text-green-600 mt-8 py-3 bg-green-100 rounded-full flex items-center justify-center gap-2">
+                          <CircleCheck size={20} /> Today's workout already completed!
+                      </div>
                   ) : (
                       <div className="text-center text-sm text-gray-500 mt-8 py-2">
                           View only. Complete today's session to advance!
