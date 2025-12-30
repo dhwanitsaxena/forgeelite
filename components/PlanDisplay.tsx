@@ -570,11 +570,11 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                       </M3Button>
                   ) : alignedWorkoutPlan[activeWorkoutCard].isToday && isTodayWorkoutCompleted ? (
                       <div className="text-center text-sm font-bold text-green-600 mt-8 py-3 bg-green-100 rounded-full flex items-center justify-center gap-2">
-                          <CircleCheck size={20} /> Today's workout already completed!
+                          <CircleCheck size={20} /> Workout completed successfully!
                       </div>
                   ) : (
                       <div className="text-center text-sm text-gray-500 mt-8 py-2">
-                          View only. Complete today's session to advance!
+                          Review today, act tomorrow &mdash; your next session is all set!
                       </div>
                   )}
 
