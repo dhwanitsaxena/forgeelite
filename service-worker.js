@@ -1,5 +1,4 @@
 
-
 const CACHE_NAME = 'forge-cache-v1';
 const urlsToCache = [
   './', // Cache the root index.html
@@ -19,7 +18,7 @@ const urlsToCache = [
   './components/ExerciseGuideModal.tsx',
   './components/BodyMap.tsx',
   './components/HowItWorksSlidesheet.tsx', // Added new component to cache
-  './components/SwipeToConfirmButton.tsx', // Added SwipeToConfirmButton to cache
+  // Removed './components/SwipeToConfirmButton.tsx', // Removed SwipeToConfirmButton from cache
   // Icons as defined in manifest.json
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',

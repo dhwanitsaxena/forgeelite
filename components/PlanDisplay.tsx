@@ -6,7 +6,7 @@ import ProgressTracker from './ProgressTracker';
 import M3Button from './M3Button';
 import ExerciseGuideModal from './ExerciseGuideModal';
 import { getAlternativeExercise } from '../services/geminiService';
-import SwipeToConfirmButton from './SwipeToConfirmButton'; // Import the new swipe component
+// Removed SwipeToConfirmButton import
 
 interface PlanDisplayProps {
   plan: TransformationPlan;
@@ -559,14 +559,15 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                     </div>
                   )}
 
-                  {/* Mark Session Complete Button (now SwipeToConfirmButton) */}
+                  {/* Mark Session Complete Button (now M3Button) */}
                   {alignedWorkoutPlan[activeWorkoutCard].isToday && !isTodayWorkoutCompleted ? (
-                      <SwipeToConfirmButton 
-                          onConfirm={handleSessionCompletionConfirmed} 
+                      <M3Button 
+                          onClick={handleSessionCompletionConfirmed} 
+                          fullWidth 
                           className="mt-8 !bg-green-600 hover:!bg-green-700 shadow-xl"
                       >
-                          Mark Session Complete
-                      </SwipeToConfirmButton>
+                          <CircleCheck size={20} /> Mark Session Complete
+                      </M3Button>
                   ) : alignedWorkoutPlan[activeWorkoutCard].isToday && isTodayWorkoutCompleted ? (
                       <div className="text-center text-sm font-bold text-green-600 mt-8 py-3 bg-green-100 rounded-full flex items-center justify-center gap-2">
                           <CircleCheck size={20} /> Today's workout already completed!
