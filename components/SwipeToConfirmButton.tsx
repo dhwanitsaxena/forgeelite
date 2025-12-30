@@ -118,9 +118,9 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
       {/* Main text for the button */}
       <div 
         className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-colors duration-300
-                    ${isConfirmedState ? 'text-[var(--md-sys-color-on-primary)]' : 'text-[var(--md-sys-color-on-secondary-container)]'}`}
+                    ${isConfirmedState ? 'text-white' : 'text-white'}`}
       >
-        <span className="font-bold text-lg">{children}</span>
+        <span className="font-bold text-base">{children}</span>
       </div>
 
       {/* Draggable Handle */}
@@ -128,7 +128,7 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
         ref={handleRef}
         className={`absolute h-full aspect-square rounded-full flex items-center justify-center shadow-lg
                     transition-transform duration-300 ease-in-out 
-                    ${isConfirmedState ? 'bg-white text-green-600' : 'bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)]'}`}
+                    ${isConfirmedState ? 'bg-white text-white' : 'bg-[var(--md-sys-color-primary)] text-white'}`}
         style={{ transform: `translateX(${translateX}px)` }}
       >
         {isConfirmedState ? <CheckCircle2 size={24} /> : <ChevronRight size={24} />}
