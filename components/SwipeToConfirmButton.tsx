@@ -27,7 +27,6 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
     if (!currentContainer) return;
 
     const observer = new ResizeObserver(entries => {
-      // We only expect one entry for the observed element
       const { width } = entries[0].contentRect;
       setContainerWidth(width);
     });
@@ -39,7 +38,7 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
         observer.unobserve(currentContainer);
       }
     };
-  }, []); // Empty dependency array means this runs once on mount and cleans up on unmount
+  }, []);
 
   const resetHandle = useCallback(() => {
     setTranslateX(0);
@@ -50,7 +49,7 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
     if (disabled) return;
     setIsDragging(true);
     initialClientXRef.current = clientX;
-    initialTranslateXRef.current = translateX; // Store current translateX when drag starts
+    initialTranslateXRef.current = translateX;
     if (handleRef.current) {
       handleRef.current.style.transition = 'none'; // Disable transition during drag
     }
@@ -58,65 +57,93 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
 
   const handleDragMove = useCallback((clientX: number) => {
     if (!isDragging || disabled) return;
-    if (containerWidth === 0 || !handleRef.current) return; // Prevent division by zero or errors if refs are not ready
+    if (containerWidth === 0 || !handleRef.current) return;
 
     const handleWidth = handleRef.current.offsetWidth;
     
     const deltaX = clientX - initialClientXRef.current;
     let newTranslateX = initialTranslateXRef.current + deltaX;
     
-    // Ensure handle stays within bounds (0 to containerWidth - handleWidth)
-    // The max value for translateX is when the right edge of the handle aligns with the right edge of the container.
     newTranslateX = Math.max(0, Math.min(newTranslateX, containerWidth - handleWidth));
     setTranslateX(newTranslateX);
-  }, [isDragging, disabled, containerWidth]); // Added containerWidth to dependencies
+  }, [isDragging, disabled, containerWidth]);
 
   const handleDragEnd = useCallback(() => {
     if (!isDragging || disabled) return;
     if (handleRef.current) {
-      handleRef.current.style.transition = 'transform 0.3s ease-in-out, background-color 0.3s ease-in-out'; // Re-enable transition
+      handleRef.current.style.transition = 'transform 0.3s ease-in-out, background-color 0.3s ease-in-out';
     }
 
     if (containerWidth > 0 && translateX >= containerWidth * dragThreshold) {
-      onConfirm(); // Trigger confirmation directly here
+      onConfirm();
     }
-    resetHandle(); // Always reset the handle after drag ends
+    resetHandle();
   }, [isDragging, disabled, containerWidth, translateX, dragThreshold, onConfirm, resetHandle]);
 
-  // Mouse event handlers
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
-    if (disabled) return;
-    e.preventDefault();
-    handleDragStart(e.clientX);
-    const onMouseMove = (moveEvent: MouseEvent) => handleDragMove(moveEvent.clientX);
+  useEffect(() => {
+    const currentContainer = containerRef.current;
+    if (!currentContainer) return;
+
+    // Mouse event handlers
+    const onMouseDown = (e: MouseEvent) => {
+      if (disabled) return;
+      e.preventDefault(); // Prevent default text selection
+      handleDragStart(e.clientX);
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      handleDragMove(e.clientX);
+    };
+
     const onMouseUp = () => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
       handleDragEnd();
     };
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  }, [disabled, handleDragStart, handleDragMove, handleDragEnd]);
 
-  // Touch event handlers
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    if (disabled) return;
-    e.preventDefault(); // Prevent scrolling
-    handleDragStart(e.touches[0].clientX);
-    const onTouchMove = (moveEvent: TouchEvent) => handleDragMove(moveEvent.touches[0].clientX);
+    // Touch event handlers
+    const onTouchStart = (e: TouchEvent) => {
+      if (disabled) return;
+      e.preventDefault(); // This is crucial to prevent default scrolling on touch devices
+      handleDragStart(e.touches[0].clientX);
+      document.addEventListener('touchmove', onTouchMove, { passive: false }); // Ensure touchmove can also preventDefault
+      document.addEventListener('touchend', onTouchEnd);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault(); // Prevent scrolling during drag
+      handleDragMove(e.touches[0].clientX);
+    };
+
     const onTouchEnd = () => {
       document.removeEventListener('touchmove', onTouchMove);
       document.removeEventListener('touchend', onTouchEnd);
       handleDragEnd();
     };
-    document.addEventListener('touchmove', onTouchMove, { passive: false }); // Needs to be non-passive to prevent default
-    document.addEventListener('touchend', onTouchEnd);
+
+    // Attach native event listeners to the container
+    currentContainer.addEventListener('mousedown', onMouseDown, { passive: false }); // Mouse down also set to passive: false for consistency
+    currentContainer.addEventListener('touchstart', onTouchStart, { passive: false });
+
+    return () => {
+      if (currentContainer) {
+        currentContainer.removeEventListener('mousedown', onMouseDown);
+        currentContainer.removeEventListener('touchstart', onTouchStart);
+      }
+      // Ensure document-level listeners are cleaned up if component unmounts mid-drag
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
   }, [disabled, handleDragStart, handleDragMove, handleDragEnd]);
+
 
   // Calculate visual properties
   const isConfirmedState = containerWidth > 0 && translateX >= containerWidth * dragThreshold;
   const handleVisibleWidth = handleRef.current ? handleRef.current.offsetWidth : 0;
-  // Calculate progressWidth to ensure it doesn't exceed 100% or cause division by zero
   const progressWidth = containerWidth > 0 && (containerWidth - handleVisibleWidth) > 0 
     ? (translateX / (containerWidth - handleVisibleWidth)) * 100 
     : 0;
@@ -127,8 +154,6 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
       className={`relative w-full h-14 rounded-full overflow-hidden flex items-center justify-start
                   select-none ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'}`}
       style={{ backgroundColor: isConfirmedState ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-secondary-container)' }}
-      onTouchStart={onTouchStart}
-      onMouseDown={onMouseDown}
     >
       {/* Background progress indicator (optional, subtle) */}
       <div 
