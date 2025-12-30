@@ -7,7 +7,6 @@ import M3Button from './M3Button';
 import ExerciseGuideModal from './ExerciseGuideModal';
 import { getAlternativeExercise } from '../services/geminiService';
 import SwipeToConfirmButton from './SwipeToConfirmButton'; // Import the new swipe component
-import confetti from 'canvas-confetti'; // Import confetti library
 
 interface PlanDisplayProps {
   plan: TransformationPlan;
@@ -130,13 +129,6 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
     onMarkDayWorkoutComplete(); // Call parent handler to mark the day's workout complete
     setShowCompletionToast(true); // Show local toast
     setTimeout(() => setShowCompletionToast(false), 3000); // Hide after 3 seconds
-
-    // Trigger confetti
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
   };
 
   // Helper function to clean exercise names (remove content in parentheses)
