@@ -1,5 +1,4 @@
 
-
 const CACHE_NAME = 'forge-cache-v1';
 const urlsToCache = [
   './', // Cache the root index.html
@@ -31,7 +30,8 @@ const urlsToCache = [
   'https://esm.sh/react@^19.2.3',
   'https://esm.sh/react-dom@^19.2.3/client',
   'https://esm.sh/lucide-react@^0.562.0',
-  'https://esm.sh/@google/genai@^1.34.0'
+  '@google/genai',
+  'https://esm.sh/canvas-confetti@1.9.3'
 ];
 
 self.addEventListener('install', event => {
