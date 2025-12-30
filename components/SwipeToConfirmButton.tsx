@@ -16,6 +16,9 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
   const [translateX, setTranslateX] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
 
+  const initialClientXRef = useRef(0);
+  const initialTranslateXRef = useRef(0);
+
   const dragThreshold = 0.7; // 70% of the container width to confirm
 
   useEffect(() => {
@@ -32,18 +35,21 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
   const handleDragStart = useCallback((clientX: number) => {
     if (disabled) return;
     setIsDragging(true);
+    initialClientXRef.current = clientX;
+    initialTranslateXRef.current = translateX; // Store current translateX when drag starts
     if (handleRef.current) {
       handleRef.current.style.transition = 'none'; // Disable transition during drag
     }
-  }, [disabled]);
+  }, [disabled, translateX]);
 
-  const handleDragMove = useCallback((clientX: number, startX: number) => {
+  const handleDragMove = useCallback((clientX: number) => {
     if (!isDragging || disabled) return;
     if (containerRef.current && handleRef.current) {
       const containerRect = containerRef.current.getBoundingClientRect();
       const handleWidth = handleRef.current.offsetWidth;
       
-      let newTranslateX = clientX - startX;
+      const deltaX = clientX - initialClientXRef.current;
+      let newTranslateX = initialTranslateXRef.current + deltaX;
       
       // Ensure handle stays within bounds (0 to containerWidth - handleWidth)
       newTranslateX = Math.max(0, Math.min(newTranslateX, containerRect.width - handleWidth));
@@ -67,9 +73,8 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     if (disabled) return;
     e.preventDefault();
-    const startX = e.clientX - (handleRef.current?.getBoundingClientRect().left || 0) + translateX;
-    handleDragStart(e.clientX - startX); // Adjust startX
-    const onMouseMove = (moveEvent: MouseEvent) => handleDragMove(moveEvent.clientX, startX);
+    handleDragStart(e.clientX);
+    const onMouseMove = (moveEvent: MouseEvent) => handleDragMove(moveEvent.clientX);
     const onMouseUp = () => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
@@ -77,15 +82,14 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
     };
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
-  }, [disabled, handleDragStart, handleDragMove, handleDragEnd, translateX]);
+  }, [disabled, handleDragStart, handleDragMove, handleDragEnd]);
 
   // Touch event handlers
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     if (disabled) return;
     e.preventDefault(); // Prevent scrolling
-    const startX = e.touches[0].clientX - (handleRef.current?.getBoundingClientRect().left || 0) + translateX;
-    handleDragStart(e.touches[0].clientX - startX); // Adjust startX
-    const onTouchMove = (moveEvent: TouchEvent) => handleDragMove(moveEvent.touches[0].clientX, startX);
+    handleDragStart(e.touches[0].clientX);
+    const onTouchMove = (moveEvent: TouchEvent) => handleDragMove(moveEvent.touches[0].clientX);
     const onTouchEnd = () => {
       document.removeEventListener('touchmove', onTouchMove);
       document.removeEventListener('touchend', onTouchEnd);
@@ -93,12 +97,15 @@ const SwipeToConfirmButton: React.FC<SwipeToConfirmButtonProps> = ({ onConfirm, 
     };
     document.addEventListener('touchmove', onTouchMove, { passive: false }); // Needs to be non-passive to prevent default
     document.addEventListener('touchend', onTouchEnd);
-  }, [disabled, handleDragStart, handleDragMove, handleDragEnd, translateX]);
+  }, [disabled, handleDragStart, handleDragMove, handleDragEnd]);
 
   // Calculate visual properties
   const isConfirmedState = containerWidth > 0 && translateX >= containerWidth * dragThreshold;
   const handleVisibleWidth = handleRef.current ? handleRef.current.offsetWidth : 0;
-  const progressWidth = containerWidth > 0 ? (translateX / (containerWidth - handleVisibleWidth)) * 100 : 0;
+  // Calculate progressWidth to ensure it doesn't exceed 100% or cause division by zero
+  const progressWidth = containerWidth > 0 && (containerWidth - handleVisibleWidth) > 0 
+    ? (translateX / (containerWidth - handleVisibleWidth)) * 100 
+    : 0;
 
   return (
     <div
