@@ -1,4 +1,3 @@
-
 const CACHE_NAME = 'forge-cache-v1';
 const urlsToCache = [
   './', // Cache the root index.html
@@ -18,6 +17,12 @@ const urlsToCache = [
   './components/ExerciseGuideModal.tsx',
   './components/BodyMap.tsx',
   './components/HowItWorksSlidesheet.tsx', // Added new component to cache
+  './components/PlanOverview.tsx', // NEW: Added for refactoring
+  './components/DietPlanSection.tsx', // NEW: Added for refactoring
+  './components/WorkoutPlanSection.tsx', // NEW: Added for refactoring
+  './components/WorkoutDayCard.tsx', // NEW: Added for refactoring
+  './components/ExerciseList.tsx', // NEW: Added for refactoring
+  './components/BottomNavBar.tsx', // NEW: Added for refactoring
   // Icons as defined in manifest.json
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',

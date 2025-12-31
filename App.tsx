@@ -7,10 +7,6 @@ import M3Button from './components/M3Button';
 import PlanDisplay from './components/PlanDisplay';
 import BodyMap from './components/BodyMap';
 import HowItWorksSlidesheet from './components/HowItWorksSlidesheet'; // Import the new component
-// Removed ProjectionsDisplay and NavigationButtons imports as their content is now inlined for case 2.
-// import ProjectionsDisplay from './components/ProjectionsDisplay'; 
-// import NavigationButtons from './components/NavigationButtons';
-// Removed Muscle, Grip, HeartPulse due to import errors. Using available icons.
 import { User, Ruler, Target, UtensilsCrossed, ChevronRight, Loader2, Sparkles, Sun, Moon, Activity, Scaling, CircleCheck, Cake, Scale, Users, Dumbbell, Hand, Leaf, Cog, Award, Rocket, Plus, ChefHat, Zap, HeartPulse, RefreshCw, Lock, ArrowLeft, Info } from 'lucide-react'; // Added Info icon
 
 const StepperInput: React.FC<{
@@ -748,7 +744,7 @@ const App: React.FC = () => {
         );
       case 100:
         return plan ? (
-          <div className="px-4 py-6">
+          <div className="px-4"> {/* Removed py-6 from here */}
             <PlanDisplay 
               plan={plan} 
               goal={profile.goal} 
@@ -788,7 +784,7 @@ const App: React.FC = () => {
         </div>
       </header>
       
-      <main className="flex-grow relative z-10 pb-6">
+      <main className="flex-grow relative z-10 pb-[96px]"> {/* Added pb-[96px] here */}
         {renderStep()}
       </main>
       
