@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { UserProfile, Gender, Goal, TransformationPlan, ProgressEntry, DietPreference, ExperienceLevel, ForgeData, SculptingTargetCategory } from './types';
 import { generateTransformationPlan } from './services/geminiService';
@@ -186,19 +185,31 @@ const App: React.FC = () => {
 
   // Load data from local storage on initial mount
   useEffect(() => {
-    // This effect runs only once on mount to check for existing data
+    const currentActualDay = new Date().getDay(); // Get the actual day of the week right now
     const localData = loadFromLocalStorage();
+
     if (localData) {
       setProfile(localData.profile);
       setPlan(localData.plan);
       setWeekNumber(localData.weekNumber);
       setProgressHistory(localData.progressHistory);
-      // Load actualDayOfWeekIndex, defaulting to current day if not present or invalid
-      setActualDayOfWeekIndex(localData.actualDayOfWeekIndex ?? new Date().getDay()); 
-      setCompletedWorkouts(localData.completedWorkouts || {}); // Load completedWorkouts or default to empty object
+
+      // Compare stored day with current actual day
+      if (localData.actualDayOfWeekIndex !== currentActualDay) {
+        // It's a new day, so update the day index and reset completed workouts
+        setActualDayOfWeekIndex(currentActualDay);
+        setCompletedWorkouts({}); // Reset completed workouts for the new day
+        console.log("New day detected! Resetting day index and workout completions.");
+      } else {
+        // Same day, load as normal
+        setActualDayOfWeekIndex(localData.actualDayOfWeekIndex); 
+        setCompletedWorkouts(localData.completedWorkouts || {});
+      }
       setStep(100); // Jump to plan display if data found
     } else {
       setStep(0); // Show landing page if no local data
+      setActualDayOfWeekIndex(currentActualDay); // Initialize with current day
+      setCompletedWorkouts({}); // Ensure it's an empty object
     }
   }, []); // Run only once on mount
 
