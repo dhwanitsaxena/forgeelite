@@ -55,9 +55,10 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
   const [activeDietDayIndex, setActiveDietDayIndex] = useState(0); 
   const [showCompletionToast, setShowCompletionToast] = useState(false); 
 
-  // Effect to set activeDietDayIndex to the current actual day on initial load
+  // Effect to set activeDietDayIndex and activeWorkoutCard to the current actual day on initial load
   useEffect(() => {
     setActiveDietDayIndex(new Date().getDay()); 
+    setActiveWorkoutCard(0); // Ensure activeWorkoutCard always defaults to 0 on initial mount
   }, []); // Run only once on mount
 
   // Re-align the workout plan so that the actual current day is at position 0 in the display cycle
@@ -97,13 +98,8 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
     });
   }, [plan.workoutPlan]);
 
-  // Effect to always set activeWorkoutCard to today's card (index 0) on load or plan change
-  useEffect(() => {
-    // The activeWorkoutCard should always default to today's card (index 0)
-    // regardless of whether it's completed or not.
-    // The user can then manually navigate to other days.
-    setActiveWorkoutCard(0);
-  }, [alignedWorkoutPlan]); // Depend only on alignedWorkoutPlan
+  // Removed the previous useEffect for activeWorkoutCard that depended on alignedWorkoutPlan.
+  // Initialization is now handled by the useEffect above (runs once on mount).
 
   // Calculate the original session number for the currently active workout card
   const originalSessionNumber = useMemo(() => {
