@@ -1,4 +1,5 @@
 
+
 export enum Gender {
   MALE = 'Male',
   FEMALE = 'Female',
@@ -71,6 +72,7 @@ export interface ForgeData {
   weekNumber: number;
   progressHistory: ProgressEntry[];
   completedWorkouts: Record<string, boolean>; // New field for persisting completed workout days (YYYY-MM-DD -> boolean)
+  currentWeekStartDate: string; // YYYY-MM-DD - Date when the current week's plan started
 }
 
 export interface Meal {

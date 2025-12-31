@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { TransformationPlan, Goal, ProgressEntry, UserProfile, Exercise, WorkoutDay, Meal, DietPlan, ExperienceLevel } from '../types';
-import { Utensils, Dumbbell, Zap, ChevronRight, ChevronLeft, Info, LineChart, AlertTriangle, Book, Loader2, Heart, Eye, Shuffle, ArrowRightLeft, Sparkles, ShieldAlert, HeartPulse, Send, Pill, Beaker, Play, Activity, Target, Calendar, Apple, Pencil, Sunrise, Sun, Moon, Footprints, Flame, Rewind, Youtube, CircleCheck } from 'lucide-react'; // Added Youtube, CircleCheck
+import { Utensils, Dumbbell, Zap, ChevronRight, ChevronLeft, Info, LineChart, AlertTriangle, Book, Loader2, Heart, Eye, Shuffle, ArrowRightLeft, Sparkles, ShieldAlert, HeartPulse, Send, Pill, Beaker, Play, Activity, Target, Calendar, Apple, Pencil, Sunrise, Sun, Moon, Footprints, Flame, Rewind, Youtube, CircleCheck, Lock } from 'lucide-react'; // Added Youtube, CircleCheck, Lock
 import ProgressTracker from './ProgressTracker';
 import M3Button from './M3Button';
 import ExerciseGuideModal from './ExerciseGuideModal';
@@ -22,6 +22,7 @@ interface PlanDisplayProps {
   // `actualDayOfWeekIndex` prop removed as it's now dynamically determined internally
   completedWorkouts: Record<string, boolean>; // New prop: Map of YYYY-MM-DD to completion status
   onMarkDayWorkoutComplete: (dateKey: string) => void; // New prop: Callback to mark a specific day's workout complete
+  currentWeekStartDate: string; // NEW PROP: The YYYY-MM-DD date when the current week's plan started
 }
 
 // Define the daysOfWeek array, starting with Sunday (index 0) to match Date.getDay()
@@ -46,7 +47,8 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
   isRefreshing,
   onEditGoals, 
   completedWorkouts, // Destructure new prop
-  onMarkDayWorkoutComplete // Destructure new prop
+  onMarkDayWorkoutComplete, // Destructure new prop
+  currentWeekStartDate, // Destructure new prop
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'diet' | 'workout' | 'progress'>('overview');
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null); 
@@ -156,6 +158,33 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
   const cleanExerciseName = (name: string): string => {
     return name.replace(/\s*\(.*?\)\s*/g, '').trim();
   };
+
+  // Logic for enabling the "Initiate Weekly Check-in" button
+  const isWeeklyCheckInEnabled = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize today to start of day
+
+    const currentWeekStart = new Date(currentWeekStartDate);
+    currentWeekStart.setHours(0, 0, 0, 0); // Normalize start of week to start of day
+
+    const currentWeekEnd = new Date(currentWeekStart);
+    currentWeekEnd.setDate(currentWeekEnd.getDate() + 6); // Set to end of the 7-day period
+
+    const isPastCurrentWeekEnd = today.getTime() >= currentWeekEnd.getTime();
+
+    let allWorkoutsCompletedForCurrentWeek = true;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(currentWeekStart);
+      d.setDate(currentWeekStart.getDate() + i);
+      const dateKey = d.toISOString().slice(0, 10);
+      if (!completedWorkouts[dateKey]) {
+        allWorkoutsCompletedForCurrentWeek = false;
+        break;
+      }
+    }
+    return isPastCurrentWeekEnd && allWorkoutsCompletedForCurrentWeek;
+  }, [currentWeekStartDate, completedWorkouts]);
+
 
   if (!plan || !plan.dailyDietPlans || !plan.workoutPlan || plan.dailyDietPlans.length !== 7) {
     return (
@@ -640,14 +669,33 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
               <div className="relative z-10">
                 <h3 className="text-xl font-black uppercase tracking-tight mb-2">Weekly Check-in</h3>
-                <p className="text-xs text-white/80 font-medium mb-6">Forge requires updated biometrics to calculate Phase {currentWeek + 1} variations.</p>
-                <M3Button 
-                  onClick={() => setActiveTab('progress')} 
-                  className="!bg-white !text-[var(--md-sys-color-primary)] shadow-xl"
-                  fullWidth
-                >
-                  <Calendar size={18} /> Initiate Weekly Sync
-                </M3Button>
+                {isWeeklyCheckInEnabled ? (
+                  <>
+                    <p className="text-xs text-white/80 font-medium mb-6">
+                      All workouts are complete! Time to log your progress and unlock your next phase.
+                    </p>
+                    <M3Button 
+                      onClick={() => { /* This button can optionally scroll to the ProgressTracker form */ }} 
+                      className="!bg-white !text-[var(--md-sys-color-primary)] shadow-xl"
+                      fullWidth
+                    >
+                      <Calendar size={18} /> Proceed to Progress Log
+                    </M3Button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xs text-white/80 font-medium mb-6">
+                      Complete all sessions and reach the end of Week {currentWeek} to initiate the weekly sync.
+                    </p>
+                    <M3Button 
+                      disabled={true} // Always disabled if not ready
+                      className="!bg-white !text-[var(--md-sys-color-primary)] opacity-70 shadow-xl"
+                      fullWidth
+                    >
+                      <Calendar size={18} /> Weekly Sync Pending
+                    </M3Button>
+                  </>
+                )}
               </div>
             </div>
             <ProgressTracker 
@@ -656,6 +704,8 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                 onAddProgress({ ...entry, weekNumber: currentWeek });
                 onRefreshPlan();
               }} 
+              isWeeklyCheckInEnabled={isWeeklyCheckInEnabled} // Pass the new prop
+              currentProfile={profile} // Pass current profile for pre-filling form
             />
           </div>
         )}

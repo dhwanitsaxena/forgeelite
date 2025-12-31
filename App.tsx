@@ -181,6 +181,7 @@ const App: React.FC = () => {
   // `actualDayOfWeekIndex` state removed. The current day will be fetched directly where needed.
   // New state for completed workouts, keyed by YYYY-MM-DD
   const [completedWorkouts, setCompletedWorkouts] = useState<Record<string, boolean>>({});
+  const [currentWeekStartDate, setCurrentWeekStartDate] = useState<string>(new Date().toISOString().slice(0, 10)); // YYYY-MM-DD
 
   // Load data from local storage on initial mount
   useEffect(() => {
@@ -192,21 +193,23 @@ const App: React.FC = () => {
       setWeekNumber(localData.weekNumber);
       setProgressHistory(localData.progressHistory);
       setCompletedWorkouts(localData.completedWorkouts || {}); // Load completedWorkouts without reset
+      setCurrentWeekStartDate(localData.currentWeekStartDate || new Date().toISOString().slice(0, 10));
       setStep(100); // Jump to plan display if data found
     } else {
       setStep(0); // Show landing page if no local data
       setCompletedWorkouts({}); // Ensure it's an empty object
+      setCurrentWeekStartDate(new Date().toISOString().slice(0, 10)); // Default for fresh start
     }
   }, []); // Run only once on mount
 
   // Save data to local storage whenever relevant state changes
   useEffect(() => {
     if (step === 100) { // Only save when the user is past onboarding
-      const dataToSave: ForgeData = { profile, plan, weekNumber, progressHistory, completedWorkouts }; // Removed actualDayOfWeekIndex
+      const dataToSave: ForgeData = { profile, plan, weekNumber, progressHistory, completedWorkouts, currentWeekStartDate }; // Removed actualDayOfWeekIndex
       const timeoutId = setTimeout(() => saveToLocalStorage(dataToSave), 500); // Debounce save
       return () => clearTimeout(timeoutId);
     }
-  }, [profile, plan, weekNumber, progressHistory, completedWorkouts, step]); // Removed actualDayOfWeekIndex
+  }, [profile, plan, weekNumber, progressHistory, completedWorkouts, currentWeekStartDate, step]); // Removed actualDayOfWeekIndex
 
   // BFP Calculation
   useEffect(() => {
@@ -283,7 +286,10 @@ const App: React.FC = () => {
     setError(null);
     try {
       const generatedPlan = await generateTransformationPlan(profile, 1, progressHistory);
+      const todayDateKey = new Date().toISOString().slice(0, 10);
       setPlan(generatedPlan);
+      setWeekNumber(1); // Ensure weekNumber is 1 for the first plan
+      setCurrentWeekStartDate(todayDateKey); // Set for the first week
       setStep(100);
     } catch (err: any) {
       console.error(err);
@@ -298,9 +304,15 @@ const App: React.FC = () => {
     setError(null);
     try {
       const nextWeek = weekNumber + 1;
+      // Calculate the start date for the *next* week
+      const prevStartDate = new Date(currentWeekStartDate);
+      prevStartDate.setDate(prevStartDate.getDate() + 7); // Move to the start of the next week
+      const newCurrentWeekStartDate = prevStartDate.toISOString().slice(0, 10);
+
       const updatedPlan = await generateTransformationPlan(profile, nextWeek, progressHistory);
       setPlan(updatedPlan);
       setWeekNumber(nextWeek);
+      setCurrentWeekStartDate(newCurrentWeekStartDate); // Update for the next week
     } catch (err: any) { 
       setError("Refresh failed: " + (err.message || "Unknown error"));
     } finally { 
@@ -751,6 +763,7 @@ const App: React.FC = () => {
               // `actualDayOfWeekIndex` prop removed
               completedWorkouts={completedWorkouts}       // Pass new prop
               onMarkDayWorkoutComplete={handleMarkDayWorkoutComplete} // Pass renamed handler
+              currentWeekStartDate={currentWeekStartDate} // Pass new prop
             />
           </div>
         ) : null;

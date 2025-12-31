@@ -1,28 +1,42 @@
 
-
-import React, { useState } from 'react';
-import { ProgressEntry } from '../types';
-import { TrendingUp, Plus, Activity, Ruler, Pencil } from 'lucide-react'; // Added Pencil icon
+import React, { useState, useEffect } from 'react';
+import { ProgressEntry, UserProfile } from '../types';
+import { TrendingUp, Plus, Activity, Ruler, Pencil, Lock } from 'lucide-react'; // Added Pencil icon, Lock
 import M3Button from './M3Button';
 
 interface ProgressTrackerProps {
   history: ProgressEntry[];
   onAddEntry: (entry: ProgressEntry) => void;
+  isWeeklyCheckInEnabled: boolean; // NEW PROP
+  currentProfile: UserProfile;    // NEW PROP
 }
 
-const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry }) => {
+const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, isWeeklyCheckInEnabled, currentProfile }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false); // New state for editing mode
   const [editingEntryDate, setEditingEntryDate] = useState<string | null>(null); // To store the date of the entry being edited
   const [formData, setFormData] = useState({
-    weight: 75,
-    waist: 80,
-    neck: 40,
-    hips: 95,
-    chest: 100,
-    arms: 35,
+    weight: currentProfile.weight,
+    waist: currentProfile.currentComposition.waistSize,
+    neck: currentProfile.currentComposition.neckSize,
+    hips: currentProfile.currentComposition.hipSize || 95,
+    chest: currentProfile.currentComposition.chestSize || 100,
+    arms: currentProfile.currentComposition.armSize || 35,
     // Note: bodyFat is intentionally left out for manual input as it's often calculated.
   });
+
+  // Update formData when currentProfile changes (e.g., when a new plan is generated or weight is updated)
+  useEffect(() => {
+    setFormData({
+      weight: currentProfile.weight,
+      waist: currentProfile.currentComposition.waistSize,
+      neck: currentProfile.currentComposition.neckSize,
+      hips: currentProfile.currentComposition.hipSize || 95,
+      chest: currentProfile.currentComposition.chestSize || 100,
+      arms: currentProfile.currentComposition.armSize || 35,
+    });
+  }, [currentProfile]);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,12 +64,12 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry }
     setEditingEntryDate(null);
     // Reset form data to defaults (or current profile values if available)
     setFormData({
-      weight: 75,
-      waist: 80,
-      neck: 40,
-      hips: 95,
-      chest: 100,
-      arms: 35,
+      weight: currentProfile.weight,
+      waist: currentProfile.currentComposition.waistSize,
+      neck: currentProfile.currentComposition.neckSize,
+      hips: currentProfile.currentComposition.hipSize || 95,
+      chest: currentProfile.currentComposition.chestSize || 100,
+      arms: currentProfile.currentComposition.armSize || 35,
     });
   };
 
@@ -79,12 +93,12 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry }
     setEditingEntryDate(null);
     // Reset form data
     setFormData({
-      weight: 75,
-      waist: 80,
-      neck: 40,
-      hips: 95,
-      chest: 100,
-      arms: 35,
+      weight: currentProfile.weight,
+      waist: currentProfile.currentComposition.waistSize,
+      neck: currentProfile.currentComposition.neckSize,
+      hips: currentProfile.currentComposition.hipSize || 95,
+      chest: currentProfile.currentComposition.chestSize || 100,
+      arms: currentProfile.currentComposition.armSize || 35,
     });
   };
 
@@ -129,9 +143,21 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry }
 
       {/* Action Button or Form */}
       {!isAdding && !isEditing ? (
-        <M3Button onClick={() => setIsAdding(true)} fullWidth variant="tonal">
-          <Plus size={18} /> Log Weekly Measurements
-        </M3Button>
+        <>
+          <M3Button 
+            onClick={() => setIsAdding(true)} 
+            fullWidth 
+            variant="tonal" 
+            disabled={!isWeeklyCheckInEnabled}
+          >
+            <Plus size={18} /> Log Weekly Measurements
+          </M3Button>
+          {!isWeeklyCheckInEnabled && (
+            <div className="text-center text-sm font-semibold text-gray-500 mt-4 p-4 bg-[var(--md-sys-color-secondary-container)] rounded-2xl flex items-center justify-center gap-2">
+              <Lock size={16} /> Complete all workouts and finish the week to log progress.
+            </div>
+          )}
+        </>
       ) : (
         <form onSubmit={handleSubmit} className="bg-[var(--md-sys-color-surface)] p-6 rounded-[32px] border border-[var(--md-sys-color-primary)]/20 shadow-xl space-y-4">
           <h4 className="font-bold text-[var(--md-sys-color-primary)] mb-2 flex items-center gap-2">
