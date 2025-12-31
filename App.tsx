@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { UserProfile, Gender, Goal, TransformationPlan, ProgressEntry, DietPreference, ExperienceLevel, ForgeData, SculptingTargetCategory } from './types';
 import { generateTransformationPlan } from './services/geminiService';
@@ -784,7 +783,7 @@ const App: React.FC = () => {
         </div>
       </header>
       
-      <main className="flex-grow relative z-10 pb-[96px]"> {/* Added pb-[96px] here */}
+      <main className="flex-grow relative z-10 pb-[120px]"> {/* Increased pb-[96px] to pb-[120px] */}
         {renderStep()}
       </main>
       
