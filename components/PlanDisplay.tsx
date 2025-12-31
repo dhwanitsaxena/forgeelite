@@ -109,7 +109,7 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
     // Fallback: if all workouts in the next 7 days are somehow marked complete,
     // or if plan is empty, default to the first card.
     setActiveWorkoutCard(0);
-  }, [alignedWorkoutPlan, completedWorkouts]); // Depend on alignedWorkoutPlan and completedWorkouts
+  }, [alignedWorkoutPlan]); // Removed `completedWorkouts` from dependencies to prevent auto-advance on complete
 
   // Calculate the original session number for the currently active workout card
   const originalSessionNumber = useMemo(() => {
@@ -181,9 +181,13 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
   const transformationProgress = Math.min(100, (currentWeek / (plan.estimatedWeeks || 12)) * 100);
   const currentDailyDietPlan = plan.dailyDietPlans[activeDietDayIndex] || plan.dailyDietPlans[0];
   
-  // Determine if the currently active workout card (workout for `activeWorkoutCard` days from now) is completed
+  // Determine if the currently active workout card is for today
+  const isCardForToday = alignedWorkoutPlan[activeWorkoutCard].isToday;
+  // Determine the calendar date key for the currently viewed workout card
   const currentViewedWorkoutDateKey = getWorkoutCalendarDate(activeWorkoutCard);
-  const isCurrentWorkoutCompleted = completedWorkouts[currentViewedWorkoutDateKey];
+  // Check if the workout for this specific date has been marked complete
+  const isCurrentWorkoutCompletedForDate = completedWorkouts[currentViewedWorkoutDateKey];
+
 
   return (
     <div className="max-w-md mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -429,7 +433,7 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                 className="bg-[var(--md-sys-color-surface)] rounded-[48px] shadow-2xl border-4 border-[var(--md-sys-color-outline)]/10 overflow-hidden transition-all duration-500 animate-in slide-in-from-right-10 fade-in"
               >
                 <div className="p-8 bg-gradient-to-br from-[var(--md-sys-color-primary)] to-blue-600 text-white relative">
-                  {alignedWorkoutPlan[activeWorkoutCard].isToday && (
+                  {isCardForToday && (
                     <div className="absolute top-6 right-8 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 animate-pulse">
                       <span className="text-xs font-black uppercase tracking-widest text-white">Today</span>
                     </div>
@@ -593,7 +597,11 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                   )}
 
                   {/* Mark Session Complete Button (now M3Button) */}
-                  {alignedWorkoutPlan[activeWorkoutCard].isToday && !isCurrentWorkoutCompleted ? (
+                  {isCurrentWorkoutCompletedForDate ? (
+                      <div className="text-center text-sm font-bold text-green-600 mt-8 py-3 bg-green-100 rounded-full flex items-center justify-center gap-2">
+                          <CircleCheck size={20} /> Workout completed successfully!
+                      </div>
+                  ) : isCardForToday ? (
                       <M3Button 
                           onClick={handleSessionCompletionConfirmed} 
                           fullWidth 
@@ -601,10 +609,6 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                       >
                           <CircleCheck size={20} /> Mark Session Complete
                       </M3Button>
-                  ) : alignedWorkoutPlan[activeWorkoutCard].isToday && isCurrentWorkoutCompleted ? (
-                      <div className="text-center text-sm font-bold text-green-600 mt-8 py-3 bg-green-100 rounded-full flex items-center justify-center gap-2">
-                          <CircleCheck size={20} /> Workout completed successfully!
-                      </div>
                   ) : (
                       <div className="text-center text-sm text-gray-500 mt-8 py-2">
                           Review today, act tomorrow &mdash; your next session is all set!
