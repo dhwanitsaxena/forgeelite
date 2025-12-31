@@ -111,6 +111,18 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
     setActiveWorkoutCard(0);
   }, [alignedWorkoutPlan, completedWorkouts]); // Depend on alignedWorkoutPlan and completedWorkouts
 
+  // Calculate the original session number for the currently active workout card
+  const originalSessionNumber = useMemo(() => {
+    if (!plan.workoutPlan || !alignedWorkoutPlan[activeWorkoutCard]) return 1; // Fallback
+
+    const currentWorkoutDay = alignedWorkoutPlan[activeWorkoutCard];
+    // Find the original index of this workout day in the full plan
+    const originalIndex = plan.workoutPlan.findIndex(
+      (day) => day.day === currentWorkoutDay.day && day.focus === currentWorkoutDay.focus
+    );
+    return originalIndex !== -1 ? originalIndex + 1 : 1; // +1 for 1-based indexing
+  }, [plan.workoutPlan, alignedWorkoutPlan, activeWorkoutCard]);
+
   type ExerciseSection = 'warmUpExercises' | 'exercises' | 'rehabExercises' | 'coolDownExercises';
 
   const handleSwapExercise = async (dayIndex: number, exerciseIndex: number, currentEx: Exercise, sectionType: ExerciseSection) => {
@@ -396,7 +408,7 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
               </button>
               <div className="text-center">
                 <span className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-1">
-                  Session {activeWorkoutCard + 1} of {alignedWorkoutPlan.length}
+                  Session {originalSessionNumber} of {plan.workoutPlan.length}
                 </span>
                 <h3 className="font-black text-[var(--md-sys-color-primary)] text-sm uppercase">
                    Phase One Focus
