@@ -1,7 +1,7 @@
 import React from 'react';
 import { DietPlan } from '../types';
 // FIX: Replaced non-existent 'Muscle' icon with 'Utensils'
-import { Sunrise, Sun, Moon, Leaf, Pill, Beaker, Utensils } from 'lucide-react';
+import { Sunrise, Sun, Moon, Leaf, Pill, Beaker, Utensils } from 'lucide-react'; // Changed Muscle to Utensils
 
 interface DietPlanSectionProps {
   currentDailyDietPlan: DietPlan;

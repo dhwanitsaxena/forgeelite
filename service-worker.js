@@ -11,18 +11,27 @@ const urlsToCache = [
   './types.ts',
   './services/geminiService.ts',
   './services/localStorageService.ts',
+  './utils/targetCalculations.ts', // NEW: Added utility for target calculations
   './components/M3Button.tsx',
   './components/PlanDisplay.tsx',
   './components/ProgressTracker.tsx',
   './components/ExerciseGuideModal.tsx',
   './components/BodyMap.tsx',
-  './components/HowItWorksSlidesheet.tsx', // Added new component to cache
-  './components/PlanOverview.tsx', // NEW: Added for refactoring
-  './components/DietPlanSection.tsx', // NEW: Added for refactoring
-  './components/WorkoutPlanSection.tsx', // NEW: Added for refactoring
-  './components/WorkoutDayCard.tsx', // NEW: Added for refactoring
-  './components/ExerciseList.tsx', // NEW: Added for refactoring
-  './components/BottomNavBar.tsx', // NEW: Added for refactoring
+  './components/HowItWorksSlidesheet.tsx',
+  './components/PlanOverview.tsx',
+  './components/DietPlanSection.tsx',
+  './components/WorkoutPlanSection.tsx',
+  './components/WorkoutDayCard.tsx',
+  './components/ExerciseList.tsx',
+  './components/BottomNavBar.tsx',
+  './components/StepperInput.tsx', // NEW: Added StepperInput
+  './components/onboarding/LandingPage.tsx', // NEW: Added onboarding step
+  './components/onboarding/FoundationStep.tsx', // NEW: Added onboarding step
+  './components/onboarding/FocusStep.tsx', // NEW: Added onboarding step
+  './components/onboarding/JointReadinessStep.tsx', // NEW: Added onboarding step
+  './components/onboarding/WorkoutStyleStep.tsx', // NEW: Added onboarding step
+  './components/onboarding/ExperienceStep.tsx', // NEW: Added onboarding step
+  './components/onboarding/NutritionStep.tsx', // NEW: Added onboarding step
   // Icons as defined in manifest.json
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',
