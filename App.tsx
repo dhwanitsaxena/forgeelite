@@ -178,14 +178,12 @@ const App: React.FC = () => {
   const [progressHistory, setProgressHistory] = useState<ProgressEntry[]>([]);
   const [customCuisineInput, setCustomCuisineInput] = useState(''); // State for custom cuisine input
   
-  // Renamed from currentDayOfWeekIndex to actualDayOfWeekIndex
-  const [actualDayOfWeekIndex, setActualDayOfWeekIndex] = useState<number>(new Date().getDay()); // Default to today's actual day of week
+  // `actualDayOfWeekIndex` state removed. The current day will be fetched directly where needed.
   // New state for completed workouts, keyed by YYYY-MM-DD
   const [completedWorkouts, setCompletedWorkouts] = useState<Record<string, boolean>>({});
 
   // Load data from local storage on initial mount
   useEffect(() => {
-    const currentActualDay = new Date().getDay(); // Get the actual day of the week right now
     const localData = loadFromLocalStorage();
 
     if (localData) {
@@ -193,22 +191,10 @@ const App: React.FC = () => {
       setPlan(localData.plan);
       setWeekNumber(localData.weekNumber);
       setProgressHistory(localData.progressHistory);
-
-      // Compare stored day with current actual day
-      if (localData.actualDayOfWeekIndex !== currentActualDay) {
-        // It's a new day, so update the day index and reset completed workouts
-        setActualDayOfWeekIndex(currentActualDay);
-        setCompletedWorkouts({}); // Reset completed workouts for the new day
-        console.log("New day detected! Resetting day index and workout completions.");
-      } else {
-        // Same day, load as normal
-        setActualDayOfWeekIndex(localData.actualDayOfWeekIndex); 
-        setCompletedWorkouts(localData.completedWorkouts || {});
-      }
+      setCompletedWorkouts(localData.completedWorkouts || {}); // Load completedWorkouts without reset
       setStep(100); // Jump to plan display if data found
     } else {
       setStep(0); // Show landing page if no local data
-      setActualDayOfWeekIndex(currentActualDay); // Initialize with current day
       setCompletedWorkouts({}); // Ensure it's an empty object
     }
   }, []); // Run only once on mount
@@ -216,11 +202,11 @@ const App: React.FC = () => {
   // Save data to local storage whenever relevant state changes
   useEffect(() => {
     if (step === 100) { // Only save when the user is past onboarding
-      const dataToSave: ForgeData = { profile, plan, weekNumber, progressHistory, actualDayOfWeekIndex, completedWorkouts }; // Include new states
+      const dataToSave: ForgeData = { profile, plan, weekNumber, progressHistory, completedWorkouts }; // Removed actualDayOfWeekIndex
       const timeoutId = setTimeout(() => saveToLocalStorage(dataToSave), 500); // Debounce save
       return () => clearTimeout(timeoutId);
     }
-  }, [profile, plan, weekNumber, progressHistory, actualDayOfWeekIndex, completedWorkouts, step]);
+  }, [profile, plan, weekNumber, progressHistory, completedWorkouts, step]); // Removed actualDayOfWeekIndex
 
   // BFP Calculation
   useEffect(() => {
@@ -343,11 +329,9 @@ const App: React.FC = () => {
     handleRefreshPlan(); // Refresh plan with updated progress
   };
 
-  // Renamed to clarify its purpose: marking the workout for the *current calendar day* as complete
-  const handleMarkDayWorkoutComplete = useCallback(() => {
-    const todayKey = new Date().toISOString().slice(0, 10); // Format YYYY-MM-DD
-    setCompletedWorkouts(prev => ({ ...prev, [todayKey]: true }));
-    // Do NOT advance actualDayOfWeekIndex here. It reflects the current real day.
+  // Modified to accept a dateKey for the workout being marked complete
+  const handleMarkDayWorkoutComplete = useCallback((dateKey: string) => {
+    setCompletedWorkouts(prev => ({ ...prev, [dateKey]: true }));
   }, []); // No dependencies that would cause it to change after being set up
 
   const renderStep = () => {
@@ -764,7 +748,7 @@ const App: React.FC = () => {
               onUpdatePlanLocally={(p) => setPlan(p)}
               isRefreshing={loading}
               onEditGoals={handleEditGoals} // Pass the new handler
-              actualDayOfWeekIndex={actualDayOfWeekIndex} // Pass renamed prop
+              // `actualDayOfWeekIndex` prop removed
               completedWorkouts={completedWorkouts}       // Pass new prop
               onMarkDayWorkoutComplete={handleMarkDayWorkoutComplete} // Pass renamed handler
             />
