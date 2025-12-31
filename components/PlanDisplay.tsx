@@ -97,19 +97,13 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
     });
   }, [plan.workoutPlan]);
 
-  // Effect to set activeWorkoutCard to the first uncompleted session from today onwards
+  // Effect to always set activeWorkoutCard to today's card (index 0) on load or plan change
   useEffect(() => {
-    for (let i = 0; i < alignedWorkoutPlan.length; i++) {
-      const workoutDateKey = getWorkoutCalendarDate(i);
-      if (!completedWorkouts[workoutDateKey]) {
-        setActiveWorkoutCard(i);
-        return;
-      }
-    }
-    // Fallback: if all workouts in the next 7 days are somehow marked complete,
-    // or if plan is empty, default to the first card.
+    // The activeWorkoutCard should always default to today's card (index 0)
+    // regardless of whether it's completed or not.
+    // The user can then manually navigate to other days.
     setActiveWorkoutCard(0);
-  }, [alignedWorkoutPlan]); // Removed `completedWorkouts` from dependencies to prevent auto-advance on complete
+  }, [alignedWorkoutPlan]); // Depend only on alignedWorkoutPlan
 
   // Calculate the original session number for the currently active workout card
   const originalSessionNumber = useMemo(() => {
