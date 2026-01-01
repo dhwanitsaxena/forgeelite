@@ -30,25 +30,11 @@ interface PlanDisplayProps {
 // Define the daysOfWeek array, starting with Sunday (index 0) to match Date.getDay()
 const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-// Helper function to get the absolute calendar date for a given day name within the current week cycle
-const getCalendarDateForKey = (dayName: string, weekStartDate: string): string => {
-  const startOfWeek = new Date(weekStartDate);
-  startOfWeek.setHours(0, 0, 0, 0); // Normalize to start of day
-
-  const startOfWeekDayIndex = startOfWeek.getDay(); // 0 for Sunday, 1 for Monday, etc.
-  const targetDayIndex = daysOfWeek.indexOf(dayName); // 0 for Sunday, 1 for Monday, etc.
-
-  let diffDays = targetDayIndex - startOfWeekDayIndex;
-  // If the target day is "before" the startOfWeekDay, wrap around to the next week's instance
-  // This handles cases where currentWeekStartDate is, say, a Wednesday, and we're looking for Monday.
-  // The plan implicitly covers 7 days starting from currentWeekStartDate.
-  if (diffDays < 0) {
-    diffDays += 7; 
-  }
-
-  const targetDate = new Date(startOfWeek);
-  targetDate.setDate(startOfWeek.getDate() + diffDays);
-  return targetDate.toISOString().slice(0, 10);
+// Helper function to get a calendar date key (YYYY-MM-DD) for a given offset from today
+const getWorkoutCalendarDate = (offsetDays: number): string => {
+  const date = new Date();
+  date.setDate(date.getDate() + offsetDays);
+  return date.toISOString().slice(0, 10); // Format YYYY-MM-DD
 };
 
 const PlanDisplay: React.FC<PlanDisplayProps> = ({
@@ -160,11 +146,9 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
     }
   };
 
-  const currentWorkoutDayInView = alignedWorkoutPlan[activeWorkoutCard];
-  const currentViewedWorkoutDateKey = currentWorkoutDayInView ? getCalendarDateForKey(currentWorkoutDayInView.day, currentWeekStartDate) : '';
-
   const handleSessionCompletionConfirmed = () => {
-    onMarkDayWorkoutComplete(currentViewedWorkoutDateKey); // Pass the correctly derived date key
+    const currentWorkoutDateKey = getWorkoutCalendarDate(activeWorkoutCard);
+    onMarkDayWorkoutComplete(currentWorkoutDateKey); // Pass the date key for the currently active workout card
     setShowCompletionToast(true); // Show local toast
     setTimeout(() => setShowCompletionToast(false), 3000); // Hide after 3 seconds
   };
@@ -275,7 +259,7 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
           setSelectedExercise={setSelectedExercise}
           handleNextWorkout={() => setActiveWorkoutCard(prev => (prev + 1) % alignedWorkoutPlan.length)}
           handlePrevWorkout={() => setActiveWorkoutCard(prev => (prev - 1 + alignedWorkoutPlan.length) % alignedWorkoutPlan.length)}
-          currentViewedWorkoutDateKey={currentViewedWorkoutDateKey} // Pass the correct date key
+          getWorkoutCalendarDate={getWorkoutCalendarDate}
         />
       )}
 
@@ -340,4 +324,3 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
 };
 
 export default PlanDisplay;
-    
