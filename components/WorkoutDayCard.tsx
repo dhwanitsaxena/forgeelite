@@ -130,7 +130,10 @@ const WorkoutDayCard: React.FC<WorkoutDayCardProps> = ({
         {/* Mark Session Complete Button */}
         {isCurrentWorkoutCompletedForDate ? (
             <div className="text-center text-sm font-bold text-green-600 mt-8 py-3 bg-green-100 rounded-full flex items-center justify-center gap-2">
-                <CircleCheck size={20} /> Workout completed successfully!
+                <CircleCheck size={20} />
+                {isCardForToday
+                  ? 'Today\'s Workout Completed! Great job!'
+                  : `Workout Completed on ${new Date(currentViewedWorkoutDateKey).toLocaleDateString()}! Great job!`}
             </div>
         ) : isCardForToday ? (
             <M3Button 
