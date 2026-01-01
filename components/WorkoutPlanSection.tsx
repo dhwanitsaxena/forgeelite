@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TransformationPlan, UserProfile, Exercise } from '../types';
 import { ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
@@ -20,7 +21,7 @@ interface WorkoutPlanSectionProps {
   setSelectedExercise: (exercise: Exercise | null) => void;
   handleNextWorkout: () => void;
   handlePrevWorkout: () => void;
-  getWorkoutCalendarDate: (offsetDays: number) => string;
+  currentViewedWorkoutDateKey: string; // Updated to receive the pre-calculated date key
 }
 
 const WorkoutPlanSection: React.FC<WorkoutPlanSectionProps> = ({
@@ -37,12 +38,12 @@ const WorkoutPlanSection: React.FC<WorkoutPlanSectionProps> = ({
   setSelectedExercise,
   handleNextWorkout,
   handlePrevWorkout,
-  getWorkoutCalendarDate,
+  currentViewedWorkoutDateKey, // Destructure the new prop
 }) => {
 
   const currentWorkoutDay = alignedWorkoutPlan[activeWorkoutCard];
   const isCardForToday = currentWorkoutDay?.isToday || false;
-  const currentViewedWorkoutDateKey = getWorkoutCalendarDate(activeWorkoutCard);
+  // Use the passed currentViewedWorkoutDateKey directly
   const isCurrentWorkoutCompletedForDate = completedWorkouts[currentViewedWorkoutDateKey];
 
   if (!plan.workoutPlan || !currentWorkoutDay) {
@@ -86,7 +87,7 @@ const WorkoutPlanSection: React.FC<WorkoutPlanSectionProps> = ({
         isCardForToday={isCardForToday}
         isCurrentWorkoutCompletedForDate={isCurrentWorkoutCompletedForDate}
         onMarkDayWorkoutComplete={onMarkDayWorkoutComplete}
-        currentViewedWorkoutDateKey={currentViewedWorkoutDateKey}
+        currentViewedWorkoutDateKey={currentViewedWorkoutDateKey} // Pass the correctly derived date key
         swappingExercise={swappingExercise}
         handleSwapExercise={handleSwapExercise}
         setSelectedExercise={setSelectedExercise}
@@ -108,3 +109,4 @@ const WorkoutPlanSection: React.FC<WorkoutPlanSectionProps> = ({
 };
 
 export default WorkoutPlanSection;
+    
