@@ -237,15 +237,15 @@ const App: React.FC = () => {
            <span className="font-bold text-sm uppercase tracking-tighter">Forge Elite</span>
         </div>
         <div className="flex items-center gap-3">
-          {user && (
-             <button onClick={handleLogout} className="p-2 rounded-full bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)]">
-                <LogOut size={20}/>
-             </button>
-          )}
           <button onClick={() => setShowHowItWorks(p => !p)} className="p-2 rounded-full bg-[var(--md-sys-color-secondary-container)] flex items-center gap-2 text-[var(--md-sys-color-on-secondary-container)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-primary)] transition-colors text-xs font-semibold uppercase tracking-tight">
             <Info size={18} /> How it Works
           </button>
           <button onClick={() => setIsDarkMode(p => !p)} className="p-2 rounded-full bg-[var(--md-sys-color-secondary-container)]">{isDarkMode ? <Sun size={20} /> : <Moon size={20} />}</button>
+          {user && (
+             <button onClick={handleLogout} className="p-2 rounded-full bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-error-container)]">
+                <LogOut size={20}/>
+             </button>
+          )}
         </div>
       </header>
       
