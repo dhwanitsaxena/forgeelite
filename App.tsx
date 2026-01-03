@@ -17,6 +17,8 @@ import ExperienceStep from './components/onboarding/ExperienceStep';
 import NutritionStep from './components/onboarding/NutritionStep';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
+import GeneratingPlanIllustration from './components/GeneratingPlanIllustration';
+
 
 // Utility & Icon Imports
 import { calculateSuggestedTargets } from './utils/targetCalculations';
@@ -152,6 +154,7 @@ const App: React.FC = () => {
       setStep(100);
     } catch (err: any) {
       setError(err.message || "Forge failed to sync. Check API key.");
+       setStep(6); // Go back to the nutrition step on failure
     } finally {
       setLoading(false);
     }
@@ -179,7 +182,6 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     if (authLoadingMessage) {
-      if (authLoadingMessage === 'Creating account...') {
         return (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
             <Rocket className="animate-bounce text-[var(--md-sys-color-primary)] mb-8" size={64} />
@@ -187,12 +189,19 @@ const App: React.FC = () => {
             <p className="text-sm text-[var(--md-sys-color-on-surface-variant)]">Get ready to start your transformation!</p>
           </div>
         );
-      }
-      return <div className="flex flex-col items-center justify-center h-full"><Loader2 className="animate-spin h-12 w-12 mb-4" /><span>{authLoadingMessage}</span></div>;
     }
     
-    if (loading && step !== 0) {
-      return <div className="flex flex-col items-center justify-center h-full"><Loader2 className="animate-spin h-12 w-12 mb-4" /><span>{loadingMessage}</span></div>;
+    if (loading) {
+        if (loadingMessage === 'Generating your plan...') {
+            return (
+                <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                    <GeneratingPlanIllustration />
+                    <h3 className="font-bold text-lg text-[var(--md-sys-color-on-surface)] mt-4">Generating your plan...</h3>
+                    <p className="text-sm text-gray-500 mt-2">Hang tight while we tailor your transformation.</p>
+                </div>
+            )
+        }
+        return <div className="flex flex-col items-center justify-center h-full"><Loader2 className="animate-spin h-12 w-12 mb-4" /><span>{loadingMessage}</span></div>;
     }
 
     if (showAuth && !user) {
@@ -224,7 +233,7 @@ const App: React.FC = () => {
       case 4: return <WorkoutStyleStep profile={profile} onToggleSelection={toggleSelection} onNext={() => setStep(5)} onPrev={() => setStep(3)} />;
       case 5: return <ExperienceStep profile={profile} setProfile={setProfile} onNext={() => setStep(6)} onPrev={() => setStep(4)} />;
       case 6: return <NutritionStep profile={profile} setProfile={setProfile} customCuisineInput={customCuisineInput} setCustomCuisineInput={setCustomCuisineInput} onToggleSelection={toggleSelection} onHandleAddCustomCuisine={handleAddCustomCuisine} onSubmit={handleSubmitOnboarding} onPrev={() => setStep(5)} loading={loading} loadingMessage={loadingMessage} error={error} />;
-      case 100: return plan ? <PlanDisplay plan={plan} goal={profile.goal} profile={profile} progressHistory={progressHistory} currentWeek={weekNumber} onAddProgress={(p)=>{}} onRefreshPlan={()=>{}} onUpdatePlanLocally={(p) => setPlan(p)} isRefreshing={loading} onEditGoals={() => setStep(2)} completedWorkouts={completedWorkouts} onMarkDayWorkoutComplete={handleMarkDayWorkoutComplete} currentWeekStartDate={currentWeekStartDate} /> : <div className="text-center p-8">Loading Plan...</div>;
+      case 100: return plan ? <PlanDisplay plan={plan} goal={profile.goal} profile={profile} progressHistory={progressHistory} currentWeek={weekNumber} onAddProgress={(p)=>{}} onRefreshPlan={()=>{}} onUpdatePlanLocally={(p) => setPlan(p)} isRefreshing={loading} onEditGoals={() => setStep(2)} completedWorkouts={completedWorkouts} onMarkDayWorkoutComplete={handleMarkDayWorkoutComplete} currentWeekStartDate={currentWeekStartDate} /> : <div>Error: Plan not found.</div>;
       default: setStep(0); return null;
     }
   };

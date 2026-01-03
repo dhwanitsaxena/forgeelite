@@ -10,6 +10,7 @@ import PlanOverview from './PlanOverview'; // New import
 import DietPlanSection from './DietPlanSection'; // New import
 import WorkoutPlanSection from './WorkoutPlanSection'; // New import
 import BottomNavBar from './BottomNavBar'; // New import
+import GeneratingPlanIllustration from './GeneratingPlanIllustration';
 
 interface PlanDisplayProps {
   plan: TransformationPlan;
@@ -183,10 +184,9 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
   if (!plan || !plan.dailyDietPlans || !plan.workoutPlan || plan.dailyDietPlans.length !== 7) {
     return (
       <div className="flex flex-col items-center justify-center p-10 text-center">
-        <AlertTriangle className="text-red-500 mb-4" size={48} />
-        <h3 className="font-bold text-lg text-[var(--md-sys-color-on-surface)]">Forge Sync in Progress...</h3>
-        <p className="text-sm text-gray-500 mt-2">Finalizing elite nutrition and training protocols.</p>
-        <M3Button onClick={() => window.location.reload()} variant="tonal" className="mt-6">Restart Sync</M3Button>
+        <GeneratingPlanIllustration />
+        <h3 className="font-bold text-lg text-[var(--md-sys-color-on-surface)] mt-4">Generating your plan...</h3>
+        <p className="text-sm text-gray-500 mt-2">Hang tight while we tailor your transformation.</p>
       </div>
     );
   }
