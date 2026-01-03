@@ -12,7 +12,7 @@ export const calculateSuggestedTargets = (profile: UserProfile, category: Sculpt
   // Ensure hipSize is included here for female profiles if applicable.
   let newTargets = {
     ...profile.targets,
-    hipSize: profile.gender === Gender.FEMALE ? profile.targets.hipSize || hipSize || 95 : undefined,
+    hipSize: profile.gender === Gender.FEMALE ? profile.targets.hipSize || hipSize || 95 : 0,
   };
 
 
@@ -78,6 +78,6 @@ export const calculateSuggestedTargets = (profile: UserProfile, category: Sculpt
     chestSize: Number((newTargets.chestSize || 100).toFixed(0)),
     armSize: Number((newTargets.armSize || 35).toFixed(1)),
     // Fix: Ensure hipSize is always present for females if it was before, or defaulted
-    hipSize: gender === Gender.FEMALE ? Number((newTargets.hipSize || 95).toFixed(0)) : undefined,
+    hipSize: gender === Gender.FEMALE ? Number((newTargets.hipSize || 95).toFixed(0)) : 0,
   };
 };
