@@ -58,7 +58,7 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 5, initialDelay =
  * GUIDELINE: Always create a new GoogleGenAI instance right before making an API call 
  * to ensure it always uses the most up-to-date API key from the dialog.
  */
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getAI = () => new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
 const cleanJson = (text: string): string => {
   if (!text) return "{}";
