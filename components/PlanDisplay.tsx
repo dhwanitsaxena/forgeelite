@@ -6,10 +6,10 @@ import ProgressTracker from './ProgressTracker';
 import M3Button from './M3Button';
 import ExerciseGuideModal from './ExerciseGuideModal';
 import { getAlternativeExercise } from '../services/geminiService';
-import PlanOverview from './PlanOverview'; // New import
-import DietPlanSection from './DietPlanSection'; // New import
-import WorkoutPlanSection from './WorkoutPlanSection'; // New import
-import BottomNavBar from './BottomNavBar'; // New import
+import PlanOverview from './PlanOverview';
+import DietPlanSection from './DietPlanSection';
+import WorkoutPlanSection from './WorkoutPlanSection';
+import BottomNavBar from './BottomNavBar';
 import GeneratingPlanIllustration from './GeneratingPlanIllustration';
 
 interface PlanDisplayProps {
@@ -66,54 +66,58 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
     setActiveWorkoutCard(0); // Ensure activeWorkoutCard always defaults to 0 on initial mount
   }, []); // Run only once on mount
 
-  // Re-align the workout plan so that the actual current day is at position 0 in the display cycle
+  // Re-align the workout plan based on the current week start date
   const alignedWorkoutPlan = useMemo(() => {
-    if (!plan.workoutPlan || plan.workoutPlan.length !== 7) return [];
+    if (!plan.workoutPlan || plan.workoutPlan.length === 0) return [];
 
-    const currentActualDayIndex = new Date().getDay(); // Get the actual day of the week (0=Sunday, 1=Monday, ...)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    // Map `plan.workoutPlan` days (e.g., 'Monday') to their actual `daysOfWeek` indices
-    const planDayNameToIndex = plan.workoutPlan.map(item => daysOfWeek.indexOf(item.day));
+    const startDate = new Date(currentWeekStartDate);
+    startDate.setHours(0, 0, 0, 0);
 
-    // Find the starting index in `plan.workoutPlan` that matches `currentActualDayIndex`
-    let startIndexInPlan = planDayNameToIndex.indexOf(currentActualDayIndex);
+    // Calculate days passed since start of the plan week
+    const diffTime = today.getTime() - startDate.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    
+    // Calculate the offset for "Today" in the plan array.
+    // If today matches startDate, offset is 0.
+    const startOffset = ((diffDays % 7) + 7) % 7; 
 
-    // Fallback if current day is not explicitly in the plan (shouldn't happen with 7 days, but for robustness)
-    if (startIndexInPlan === -1) {
-        startIndexInPlan = 0;
-        console.warn(`Workout plan doesn't contain a day for currentActualDayIndex ${currentActualDayIndex}. Defaulting to first plan day.`);
-    }
-
-    // Create a rotated version of the workout plan
+    // Rotate the plan so the element corresponding to "Today" is at index 0
     const rotatedPlan = [
-        ...plan.workoutPlan.slice(startIndexInPlan),
-        ...plan.workoutPlan.slice(0, startIndexInPlan)
+        ...plan.workoutPlan.slice(startOffset),
+        ...plan.workoutPlan.slice(0, startOffset)
     ];
 
-    // Now map the rotated plan to include `actualDayName` and `isToday`
+    const currentActualDayIndex = today.getDay(); // 0=Sunday, 1=Monday...
+
     return rotatedPlan.map((dayData, index) => {
-        // The actual day name is derived from the *original* `daysOfWeek` array based on `currentActualDayIndex`
-        // shifted by `index` within the rotated plan.
+        // Calculate the actual day name (Sunday, Monday...) for this card
         const realDayIndex = (currentActualDayIndex + index) % 7;
         return {
             ...dayData,
             actualDayName: daysOfWeek[realDayIndex],
-            isToday: index === 0 // The first element of the rotated plan is "today"
+            isToday: index === 0
         };
     });
-  }, [plan.workoutPlan]);
+  }, [plan.workoutPlan, currentWeekStartDate]);
 
-  // Calculate the original session number for the currently active workout card
+  // Calculate the original session number (1-7) for the active card
   const originalSessionNumber = useMemo(() => {
-    if (!plan.workoutPlan || !alignedWorkoutPlan[activeWorkoutCard]) return 1; // Fallback
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(currentWeekStartDate);
+    startDate.setHours(0, 0, 0, 0);
+    const diffTime = today.getTime() - startDate.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    const startOffset = ((diffDays % 7) + 7) % 7;
 
-    const currentWorkoutDay = alignedWorkoutPlan[activeWorkoutCard];
-    // Find the original index of this workout day in the full plan
-    const originalIndex = plan.workoutPlan.findIndex(
-      (day) => day.day === currentWorkoutDay.day && day.focus === currentWorkoutDay.focus
-    );
-    return originalIndex !== -1 ? originalIndex + 1 : 1; // +1 for 1-based indexing
-  }, [plan.workoutPlan, alignedWorkoutPlan, activeWorkoutCard]);
+    // The original index in the plan array is (startOffset + activeWorkoutCard) % 7
+    // Session number is 1-based index
+    const originalIndex = (startOffset + activeWorkoutCard) % 7;
+    return originalIndex + 1;
+  }, [currentWeekStartDate, activeWorkoutCard]);
 
   type ExerciseSection = 'warmUpExercises' | 'exercises' | 'rehabExercises' | 'coolDownExercises';
 
@@ -127,15 +131,24 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
       const newPlan = { ...plan };
       const newWorkoutPlan = [...(newPlan.workoutPlan || [])];
 
-      if (newWorkoutPlan[dayIndex]) {
-        const newDay = { ...newWorkoutPlan[dayIndex] };
+      // Calculate the correct index in the original plan array
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const startDate = new Date(currentWeekStartDate);
+      startDate.setHours(0, 0, 0, 0);
+      const diffDays = Math.round((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      const startOffset = ((diffDays % 7) + 7) % 7;
+      const originalPlanIndex = (startOffset + dayIndex) % 7;
+
+      if (newWorkoutPlan[originalPlanIndex]) {
+        const newDay = { ...newWorkoutPlan[originalPlanIndex] };
 
         // Ensure the array exists and update it
         const targetExercises = [...(newDay[sectionType] || [])];
         if (targetExercises[exerciseIndex]) {
           targetExercises[exerciseIndex] = { ...alternative, isAlternative: true };
           newDay[sectionType] = targetExercises;
-          newWorkoutPlan[dayIndex] = newDay;
+          newWorkoutPlan[originalPlanIndex] = newDay;
           newPlan.workoutPlan = newWorkoutPlan;
           onUpdatePlanLocally(newPlan);
         }
