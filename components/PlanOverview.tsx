@@ -30,7 +30,7 @@ const PlanOverview: React.FC<PlanOverviewProps> = ({ plan, profile, currentWeek,
         </div>
         <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
           <div 
-            className="absolute top-0 left-0 h-full bg-gradient-to-r from-[var(--md-sys-color-primary)] to-cyan-400 rounded-full transition-all duration-1000 ease-out"
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-[var(--md-sys-color-primary)] to-cyan-800 rounded-full transition-all duration-1000 ease-out"
             style={{ width: `${transformationProgress}%` }}
           />
         </div>

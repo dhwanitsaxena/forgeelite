@@ -35,6 +35,7 @@ const App: React.FC = () => {
   const [showHowItWorks, setShowHowItWorks] = useState<boolean>(false); 
   const [showAuth, setShowAuth] = useState<boolean>(false); 
   const [showLogin, setShowLogin] = useState<boolean>(true); 
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false); // New flag to track if data has been loaded
   
   const [profile, setProfile] = useState<UserProfile>({
     age: 25, height: 175, weight: 75, gender: Gender.MALE, goal: Goal.MUSCLE,
@@ -59,26 +60,35 @@ const App: React.FC = () => {
         setShowAuth(false); 
         setLoading(true);
         setLoadingMessage("Loading your Forge data...");
-        const userData = await loadData(currentUser.uid);
-        if (userData && userData.plan) { 
-          setProfile(userData.profile);
-          setPlan(userData.plan);
-          setWeekNumber(userData.weekNumber);
-          setProgressHistory(userData.progressHistory || []);
-          setCompletedWorkouts(userData.completedWorkouts || {});
-          setCurrentWeekStartDate(userData.currentWeekStartDate || new Date().toISOString().slice(0, 10));
-          setStep(100); 
-        } else if (userData) { 
-          setProfile(userData.profile);
-          setStep(1); 
-        } else {
-           setStep(0);
+        try {
+          const userData = await loadData(currentUser.uid);
+          if (userData && userData.plan) { 
+            setProfile(userData.profile);
+            setPlan(userData.plan);
+            setWeekNumber(userData.weekNumber);
+            setProgressHistory(userData.progressHistory || []);
+            setCompletedWorkouts(userData.completedWorkouts || {});
+            setCurrentWeekStartDate(userData.currentWeekStartDate || new Date().toISOString().slice(0, 10));
+            setStep(100); 
+          } else if (userData) { 
+            setProfile(userData.profile);
+            setStep(1); 
+          } else {
+             setStep(0);
+          }
+        } catch (err) {
+          console.error("Failed to load data:", err);
+          setError("Failed to load your progress.");
+        } finally {
+          setIsDataLoaded(true); // Mark data as loaded
+          setLoading(false);
+          setAuthLoadingMessage(null); 
         }
       } else {
         // When user is null (logged out), reset state
         setStep(0);
         setPlan(null);
-        // Reset profile to default, or specific fields if you want to keep some data
+        setIsDataLoaded(false); // Reset loaded flag
         setProfile({
             age: 25, height: 175, weight: 75, gender: Gender.MALE, goal: Goal.MUSCLE,
             experienceLevel: ExperienceLevel.BEGINNER, cuisine: ['High Protein'], customCuisinePreferences: [],
@@ -87,16 +97,15 @@ const App: React.FC = () => {
             sculptingTargetCategory: SculptingTargetCategory.FAT_LOSS_WEIGHT_LOSS,
             targets: { weight: 80, bodyFatPercentage: 12, waistSize: 80, hipSize: 90, chestSize: 110, armSize: 40 }
         });
+        setLoading(false);
       }
-      setLoading(false);
-      setAuthLoadingMessage(null); // Clear auth loading message after auth state change
     });
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    // Only save data if there is a user
-    if (user) {
+    // Only save data if there is a user AND data has been initially loaded
+    if (user && isDataLoaded) {
       const dataToSave: ForgeData = { profile, plan, weekNumber, progressHistory, completedWorkouts, currentWeekStartDate };
       // Save immediately if the plan has just been generated or during onboarding
       if (step >= 1 && step < 100 || (step === 100 && plan)) {
@@ -107,7 +116,7 @@ const App: React.FC = () => {
         return () => clearTimeout(timeoutId);
       }
     }
-  }, [profile, plan, weekNumber, progressHistory, completedWorkouts, currentWeekStartDate, user, step]);
+  }, [profile, plan, weekNumber, progressHistory, completedWorkouts, currentWeekStartDate, user, step, isDataLoaded]);
 
   useEffect(() => { 
     if (isDarkMode) document.documentElement.classList.add('dark');
