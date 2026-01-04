@@ -65,7 +65,7 @@ const BodyMap: React.FC<BodyMapProps> = ({ selectedRegions, onToggleRegion }) =>
         >
           {/* Anatomical Grid background */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'linear-gradient(var(--md-sys-color-on-surface) 1.5px, transparent 1.5px), linear-gradient(90deg, var(--md-sys-color-on-surface) 1.5px, transparent 1.5px)', backgroundSize: '48px 48px' }} />
-          
+         
           {/* Floating Perspective Label */}
           <div className="absolute top-8 left-8 flex items-center gap-2">
              <div className="w-2 h-2 rounded-full bg-[var(--md-sys-color-primary)] animate-pulse" />
@@ -79,7 +79,7 @@ const BodyMap: React.FC<BodyMapProps> = ({ selectedRegions, onToggleRegion }) =>
             <path 
               d="M50,5 c-6,0 -12,4 -12,12 c0,6 4,12 8,14 v4 c-12,0 -24,3 -30,10 c-5,5 -6,12 -4,17 l8,42 c1,5 5,7 10,7 h4 v42 c0,5 3,7 6,7 h12 c3,0 6,-1 6,-5 v-35 h2 c3,0 6,-3 6,-5 v-42 h5 c5,0 9,-2 10,-7 l8,-42 c2,-5 1,-12 -4,-17 c-6,-7 -18,-10 -30,-10 v-4 c4,-2 8,-8 8,-14 c0,-8 -6,-12 -12,-12 z" 
               fill="var(--md-sys-color-surface)" // Almost white in light mode
-              opacity="0.9" // More solid
+              opacity="0.1" // More solid background humanoid
               className="drop-shadow-xl" // Stronger shadow
             />
 
@@ -98,7 +98,7 @@ const BodyMap: React.FC<BodyMapProps> = ({ selectedRegions, onToggleRegion }) =>
                   className={`cursor-pointer transition-all duration-300 ${
                     isActive 
                       ? 'fill-[var(--md-sys-color-primary)] filter drop-shadow-[0_0_16px_rgba(0,100,149,0.9)]' 
-                      : 'fill-[var(--md-sys-color-on-surface-variant)]/20 hover:fill-[var(--md-sys-color-on-surface-variant)]/40 active:scale-95' // Translucent dark grey for inactive, stronger on hover
+                      : 'fill-gray-200 hover:fill-gray-400 active:scale-95' 
                   }`}
                   stroke="var(--md-sys-color-outline)"
                   strokeWidth="1.2" // Thicker stroke
