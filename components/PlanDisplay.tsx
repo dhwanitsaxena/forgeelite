@@ -287,26 +287,14 @@ const PlanDisplay: React.FC<PlanDisplayProps> = ({
                   <p className="text-xs text-white/80 font-medium mb-6">
                     All workouts are complete! Time to log your progress and unlock your next phase.
                   </p>
-                  <M3Button
-                    onClick={() => { /* This button can optionally scroll to the ProgressTracker form */ }}
-                    className="!bg-white !text-[var(--md-sys-color-primary)] shadow-xl"
-                    fullWidth
-                  >
-                    <Youtube size={18} /> Proceed to Progress Log
-                  </M3Button>
+                  {/* Redundant button to scroll down removed */}
                 </>
               ) : (
                 <>
-                  <p className="text-xs text-white/80 font-medium mb-6">
+                  <p className="text-xs text-white/80 font-medium mb-0">
                     Complete all sessions and reach the end of Week {currentWeek} to initiate the weekly sync.
                   </p>
-                  <M3Button
-                    disabled={true} // Always disabled if not ready
-                    className="!bg-white !text-[var(--md-sys-color-primary)] opacity-70 shadow-xl"
-                    fullWidth
-                  >
-                    <Youtube size={18} /> Weekly Sync Pending
-                  </M3Button>
+                  {/* Redundant disabled button removed */}
                 </>
               )}
             </div>
