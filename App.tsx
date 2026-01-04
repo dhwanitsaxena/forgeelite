@@ -41,9 +41,9 @@ const App: React.FC = () => {
     age: 25, height: 175, weight: 75, gender: Gender.MALE, goal: Goal.MUSCLE,
     experienceLevel: ExperienceLevel.BEGINNER, cuisine: ['High Protein'], customCuisinePreferences: [],
     dietPreference: DietPreference.BOTH, workoutPreferences: ['Free Weights'], medicalConditions: [],
-    currentComposition: { bmi: 24.5, bodyFatPercentage: 18, waistSize: 85, neckSize: 40, hipSize: 95, chestSize: 100, armSize: 35 },
+    currentComposition: { bmi: 24.5, bodyFatPercentage: 18, waistSize: 85, neckSize: 40, hipSize: 95 },
     sculptingTargetCategory: SculptingTargetCategory.FAT_LOSS_WEIGHT_LOSS,
-    targets: { weight: 80, bodyFatPercentage: 12, waistSize: 80, hipSize: 90, chestSize: 110, armSize: 40 }
+    targets: { weight: 80, bodyFatPercentage: 12, waistSize: 80, hipSize: 90 }
   });
 
   const [plan, setPlan] = useState<TransformationPlan | null>(null);
@@ -93,9 +93,9 @@ const App: React.FC = () => {
             age: 25, height: 175, weight: 75, gender: Gender.MALE, goal: Goal.MUSCLE,
             experienceLevel: ExperienceLevel.BEGINNER, cuisine: ['High Protein'], customCuisinePreferences: [],
             dietPreference: DietPreference.BOTH, workoutPreferences: ['Free Weights'], medicalConditions: [],
-            currentComposition: { bmi: 24.5, bodyFatPercentage: 18, waistSize: 85, neckSize: 40, hipSize: 95, chestSize: 100, armSize: 35 },
+            currentComposition: { bmi: 24.5, bodyFatPercentage: 18, waistSize: 85, neckSize: 40, hipSize: 95 },
             sculptingTargetCategory: SculptingTargetCategory.FAT_LOSS_WEIGHT_LOSS,
-            targets: { weight: 80, bodyFatPercentage: 12, waistSize: 80, hipSize: 90, chestSize: 110, armSize: 40 }
+            targets: { weight: 80, bodyFatPercentage: 12, waistSize: 80, hipSize: 90 }
         });
         setLoading(false);
       }

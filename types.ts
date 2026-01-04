@@ -38,8 +38,6 @@ export interface BodyComposition {
   waistSize: number;
   neckSize: number;
   hipSize?: number;
-  chestSize?: number;
-  armSize?: number;
 }
 
 export interface UserProfile {
@@ -61,8 +59,6 @@ export interface UserProfile {
     bodyFatPercentage: number;
     waistSize: number;
     hipSize?: number; // Added hipSize to targets
-    chestSize?: number;
-    armSize?: number;
   };
 }
 
@@ -137,12 +133,15 @@ export interface ProgressEntry {
   date: string;
   weekNumber: number;
   weight: number;
-  bodyFat?: number;
+  bodyFatPercentage?: number;
   measurements: {
     waist?: number;
     neck?: number;
     hips?: number;
-    chest?: number;
-    arms?: number;
   };
+  photos?: {
+      front: string;
+      back: string;
+      side: string;
+  }
 }
