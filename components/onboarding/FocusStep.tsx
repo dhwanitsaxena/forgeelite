@@ -92,11 +92,9 @@ const FocusStep: React.FC<FocusStepProps> = ({ profile, setProfile, onNext, onPr
         >
           <div className="flex justify-between items-start mb-4">
             <h3 className="font-black text-sm uppercase tracking-widest flex items-center gap-2 text-[var(--md-sys-color-primary)]">
-              <Target size={16} /> Forge's Target Projections
+              <Target size={16} /> Target Projections
             </h3>
-            <div className="tooltip" data-tip="Calculations based on US Navy Formula">
-               <Info size={14} className="text-gray-400" />
-            </div>
+            
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             <div className="flex items-center gap-2">
