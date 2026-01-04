@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserProfile, SculptingTargetCategory, Gender } from '../../types';
 import M3Button from '../M3Button';
-import { Target, Scale, Sparkles, Activity, Scaling, CircleCheck, Ruler, Pencil, ArrowLeft } from 'lucide-react'; // Added Pencil
+import { Target, Scale, Sparkles, Activity, Scaling, CircleCheck, Ruler, Pencil, ArrowLeft, Ratio, Info } from 'lucide-react'; // Added Info
 
 interface FocusStepProps {
   profile: UserProfile;
@@ -90,9 +90,14 @@ const FocusStep: React.FC<FocusStepProps> = ({ profile, setProfile, onNext, onPr
           key={profile.sculptingTargetCategory}
           className="bg-[var(--md-sys-color-surface)] p-6 rounded-[32px] border border-[var(--md-sys-color-outline)]/10 mb-8 animate-in fade-in zoom-in-95 duration-500"
         >
-          <h3 className="font-black text-sm uppercase tracking-widest flex items-center gap-2 mb-4 text-[var(--md-sys-color-primary)]">
-            <Target size={16} /> Forge's Target Projections
-          </h3>
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="font-black text-sm uppercase tracking-widest flex items-center gap-2 text-[var(--md-sys-color-primary)]">
+              <Target size={16} /> Forge's Target Projections
+            </h3>
+            <div className="tooltip" data-tip="Calculations based on US Navy Formula">
+               <Info size={14} className="text-gray-400" />
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             <div className="flex items-center gap-2">
               <Scale size={18} className="text-[var(--md-sys-color-on-surface-variant)]" />
@@ -115,27 +120,9 @@ const FocusStep: React.FC<FocusStepProps> = ({ profile, setProfile, onNext, onPr
                 <span className="block text-sm font-black text-[var(--md-sys-color-on-surface)]">{profile.targets.waistSize} cm</span>
               </div>
             </div>
-            {profile.targets.chestSize && (
+            {profile.gender === Gender.FEMALE && !!profile.targets.hipSize && (
               <div className="flex items-center gap-2">
-                <Ruler size={18} className="text-[var(--md-sys-color-on-surface-variant)]" />
-                <div>
-                  <span className="block text-xs font-bold text-gray-400 uppercase">Chest</span>
-                  <span className="block text-sm font-black text-[var(--md-sys-color-on-surface)]">{profile.targets.chestSize} cm</span>
-                </div>
-              </div>
-            )}
-            {profile.targets.armSize && (
-              <div className="flex items-center gap-2">
-                <Ruler size={18} className="text-[var(--md-sys-color-on-surface-variant)]" />
-                <div>
-                  <span className="block text-xs font-bold text-gray-400 uppercase">Arm</span>
-                  <span className="block text-sm font-black text-[var(--md-sys-color-on-surface)]">{profile.targets.armSize} cm</span>
-                </div>
-              </div>
-            )}
-            {profile.gender === Gender.FEMALE && profile.targets.hipSize && (
-              <div className="flex items-center gap-2">
-                <Ruler size={18} className="text-[var(--md-sys-color-on-surface-variant)]" />
+                <Ratio size={18} className="text-[var(--md-sys-color-on-surface-variant)]" />
                 <div>
                   <span className="block text-xs font-bold text-gray-400 uppercase">Hips</span>
                   <span className="block text-sm font-black text-[var(--md-sys-color-on-surface)]">{profile.targets.hipSize} cm</span>
@@ -143,6 +130,9 @@ const FocusStep: React.FC<FocusStepProps> = ({ profile, setProfile, onNext, onPr
               </div>
             )}
           </div>
+           <p className="text-[10px] text-gray-400 mt-4 text-center leading-tight">
+            *Body Fat % is estimated using the U.S. Navy Method based on your measurements.
+          </p>
         </div>
 
         <div className="flex gap-3">

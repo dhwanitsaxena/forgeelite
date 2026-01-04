@@ -124,9 +124,22 @@ const App: React.FC = () => {
   }, [isDarkMode]);
 
   useEffect(() => {
+    // Recalculate targets whenever profile foundation metrics or category changes.
+    // This ensures targets are always up-to-date with the user's current data.
     const updatedTargets = calculateSuggestedTargets(profile, profile.sculptingTargetCategory);
-    setProfile(prev => ({ ...prev, targets: updatedTargets }));
-  }, [profile.sculptingTargetCategory]);
+    
+    // Check if targets actually changed to prevent infinite loop
+    if (JSON.stringify(updatedTargets) !== JSON.stringify(profile.targets)) {
+       setProfile(prev => ({ ...prev, targets: updatedTargets }));
+    }
+  }, [
+    profile.sculptingTargetCategory, 
+    profile.weight, 
+    profile.height, 
+    profile.gender,
+    // Using stringify for deep object comparison in dependency array
+    JSON.stringify(profile.currentComposition) 
+  ]);
 
   const handleStartTransformation = () => {
     if (user) {

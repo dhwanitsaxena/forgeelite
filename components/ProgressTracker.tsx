@@ -20,8 +20,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
     waist: currentProfile.currentComposition.waistSize,
     neck: currentProfile.currentComposition.neckSize,
     hips: currentProfile.currentComposition.hipSize || 95,
-    chest: currentProfile.currentComposition.chestSize || 100,
-    arms: currentProfile.currentComposition.armSize || 35,
     // Note: bodyFat is intentionally left out for manual input as it's often calculated.
   });
 
@@ -32,8 +30,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
       waist: currentProfile.currentComposition.waistSize,
       neck: currentProfile.currentComposition.neckSize,
       hips: currentProfile.currentComposition.hipSize || 95,
-      chest: currentProfile.currentComposition.chestSize || 100,
-      arms: currentProfile.currentComposition.armSize || 35,
     });
   }, [currentProfile]);
 
@@ -53,8 +49,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
         waist: formData.waist,
         neck: formData.neck,
         hips: formData.hips,
-        chest: formData.chest,
-        arms: formData.arms
       }
     };
 
@@ -68,8 +62,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
       waist: currentProfile.currentComposition.waistSize,
       neck: currentProfile.currentComposition.neckSize,
       hips: currentProfile.currentComposition.hipSize || 95,
-      chest: currentProfile.currentComposition.chestSize || 100,
-      arms: currentProfile.currentComposition.armSize || 35,
     });
   };
 
@@ -82,8 +74,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
       waist: entry.measurements.waist || 80,
       neck: entry.measurements.neck || 40,
       hips: entry.measurements.hips || 95,
-      chest: entry.measurements.chest || 100,
-      arms: entry.measurements.arms || 35,
     });
   };
 
@@ -97,8 +87,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
       waist: currentProfile.currentComposition.waistSize,
       neck: currentProfile.currentComposition.neckSize,
       hips: currentProfile.currentComposition.hipSize || 95,
-      chest: currentProfile.currentComposition.chestSize || 100,
-      arms: currentProfile.currentComposition.armSize || 35,
     });
   };
 
@@ -200,24 +188,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
                  />
                </div>
              </div>
-             <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[var(--md-sys-color-on-surface-variant)] uppercase mb-1">Chest</label>
-                  <input 
-                    type="number" value={formData.chest} 
-                    onChange={e => setFormData({...formData, chest: parseInt(e.target.value)})}
-                    className="w-full bg-[var(--md-sys-color-secondary-container)] border-none rounded-xl p-2 text-sm text-[var(--md-sys-color-on-surface)] focus:ring-2 focus->ring-[var(--md-sys-color-primary)]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[var(--md-sys-color-on-surface-variant)] uppercase mb-1">Arms</label>
-                  <input 
-                    type="number" value={formData.arms} 
-                    onChange={e => setFormData({...formData, arms: parseInt(e.target.value)})}
-                    className="w-full bg-[var(--md-sys-color-secondary-container)] border-none rounded-xl p-2 text-sm text-[var(--md-sys-color-on-surface)] focus:ring-2 focus:ring-[var(--md-sys-color-primary)]"
-                  />
-                </div>
-             </div>
           </div>
           <div className="flex gap-2 pt-2">
             <M3Button onClick={handleCancelForm} variant="text" fullWidth>Cancel</M3Button>
@@ -254,14 +224,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
                     <span className="text-[11px] font-bold text-[var(--md-sys-color-on-surface)]">{entry.measurements.hips}</span>
                  </div>
                )}
-               <div className="flex flex-col items-center px-2 py-1 bg-[var(--md-sys-color-secondary-container)] rounded-lg shrink-0">
-                  <span className="text-[9px] text-gray-400 uppercase">C</span>
-                  <span className="text-[11px] font-bold text-[var(--md-sys-color-on-surface)]">{entry.measurements.chest}</span>
-               </div>
-               <div className="flex flex-col items-center px-2 py-1 bg-[var(--md-sys-color-secondary-container)] rounded-lg shrink-0">
-                  <span className="text-[9px] text-gray-400 uppercase">A</span>
-                  <span className="text-[11px] font-bold text-[var(--md-sys-color-on-surface)]">{entry.measurements.arms}</span>
-                 </div>
             </div>
             <M3Button 
               onClick={() => handleEditClick(entry)} 
