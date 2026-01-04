@@ -1,29 +1,29 @@
 
 import React, { useState, useEffect } from 'react';
-import { ProgressEntry, UserProfile } from '../types';
-import { TrendingUp, Plus, Activity, Ruler, Pencil, Lock } from 'lucide-react'; // Added Pencil icon, Lock
+import { ProgressEntry, UserProfile, Gender } from '../types';
+import { TrendingUp, Plus, Activity, Ruler, Pencil, Lock } from 'lucide-react'; 
 import M3Button from './M3Button';
 
 interface ProgressTrackerProps {
   history: ProgressEntry[];
   onAddEntry: (entry: ProgressEntry) => void;
-  isWeeklyCheckInEnabled: boolean; // NEW PROP
-  currentProfile: UserProfile;    // NEW PROP
+  isWeeklyCheckInEnabled: boolean; 
+  currentProfile: UserProfile;    
 }
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, isWeeklyCheckInEnabled, currentProfile }) => {
   const [isAdding, setIsAdding] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // New state for editing mode
-  const [editingEntryDate, setEditingEntryDate] = useState<string | null>(null); // To store the date of the entry being edited
+  const [isEditing, setIsEditing] = useState(false); 
+  const [editingEntryDate, setEditingEntryDate] = useState<string | null>(null); 
   const [formData, setFormData] = useState({
     weight: currentProfile.weight,
     waist: currentProfile.currentComposition.waistSize,
     neck: currentProfile.currentComposition.neckSize,
     hips: currentProfile.currentComposition.hipSize || 95,
-    // Note: bodyFat is intentionally left out for manual input as it's often calculated.
   });
 
-  // Update formData when currentProfile changes (e.g., when a new plan is generated or weight is updated)
+  const isFemale = currentProfile.gender === Gender.FEMALE;
+
   useEffect(() => {
     setFormData({
       weight: currentProfile.weight,
@@ -38,17 +38,16 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
     e.preventDefault();
     const today = new Date().toLocaleDateString();
     
-    // Determine the date for the entry (today for new, or the edited entry's date)
     const entryDate = isEditing && editingEntryDate ? editingEntryDate : today;
 
     const newEntry: ProgressEntry = {
       date: entryDate,
-      weekNumber: 0, // Parent component (App.tsx) will override this
+      weekNumber: 0, 
       weight: formData.weight,
       measurements: {
         waist: formData.waist,
         neck: formData.neck,
-        hips: formData.hips,
+        hips: isFemale ? formData.hips : undefined,
       }
     };
 
@@ -56,7 +55,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
     setIsAdding(false);
     setIsEditing(false);
     setEditingEntryDate(null);
-    // Reset form data to defaults (or current profile values if available)
     setFormData({
       weight: currentProfile.weight,
       waist: currentProfile.currentComposition.waistSize,
@@ -67,7 +65,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
 
   const handleEditClick = (entry: ProgressEntry) => {
     setIsEditing(true);
-    setIsAdding(false); // Ensure we're not in adding mode
+    setIsAdding(false); 
     setEditingEntryDate(entry.date);
     setFormData({
       weight: entry.weight,
@@ -81,7 +79,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
     setIsAdding(false);
     setIsEditing(false);
     setEditingEntryDate(null);
-    // Reset form data
     setFormData({
       weight: currentProfile.weight,
       waist: currentProfile.currentComposition.waistSize,
@@ -179,14 +176,16 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
                    className="w-full bg-[var(--md-sys-color-secondary-container)] border-none rounded-xl p-3 text-[var(--md-sys-color-on-surface)] focus:ring-2 focus:ring-[var(--md-sys-color-primary)]"
                  />
                </div>
-               <div>
-                 <label className="block text-xs font-bold text-[var(--md-sys-color-on-surface-variant)] uppercase mb-1">Hips (cm)</label>
-                 <input 
-                   type="number" value={formData.hips} 
-                   onChange={e => setFormData({...formData, hips: parseInt(e.target.value)})}
-                   className="w-full bg-[var(--md-sys-color-secondary-container)] border-none rounded-xl p-3 text-[var(--md-sys-color-on-surface)] focus:ring-2 focus:ring-[var(--md-sys-color-primary)]"
-                 />
-               </div>
+               {isFemale && (
+                 <div>
+                   <label className="block text-xs font-bold text-[var(--md-sys-color-on-surface-variant)] uppercase mb-1">Hips (cm)</label>
+                   <input 
+                     type="number" value={formData.hips} 
+                     onChange={e => setFormData({...formData, hips: parseInt(e.target.value)})}
+                     className="w-full bg-[var(--md-sys-color-secondary-container)] border-none rounded-xl p-3 text-[var(--md-sys-color-on-surface)] focus:ring-2 focus:ring-[var(--md-sys-color-primary)]"
+                   />
+                 </div>
+               )}
              </div>
           </div>
           <div className="flex gap-2 pt-2">
