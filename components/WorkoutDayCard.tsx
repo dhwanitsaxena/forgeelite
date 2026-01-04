@@ -93,7 +93,7 @@ const WorkoutDayCard: React.FC<WorkoutDayCardProps> = ({
 
         {/* Rehabilitation Exercises Section */}
         {workoutDay.rehabExercises && workoutDay.rehabExercises.length > 0 && (
-          <div className="pt-8 border-t border-[var(--md-sys-color-outline)]/10 mt-8">
+          <div className="pt-8">
             <ExerciseList
               exercises={workoutDay.rehabExercises}
               title="Rehabilitation Protocols"
@@ -111,7 +111,7 @@ const WorkoutDayCard: React.FC<WorkoutDayCardProps> = ({
         )}
 
         {/* Cool-Down Exercises Section */}
-        <div className="pt-8 border-t border-[var(--md-sys-color-outline)]/10 mt-8">
+        <div className="pt-8">
           <ExerciseList
             exercises={workoutDay.coolDownExercises}
             title="Cool-Down Protocols"
