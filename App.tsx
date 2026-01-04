@@ -181,6 +181,31 @@ const App: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const handleAddProgress = (entry: ProgressEntry) => {
+    setProgressHistory(prev => [...prev, entry]);
+  };
+
+  const handleRefreshPlan = async () => {
+    if (!user) return;
+    setLoading(true);
+    setLoadingMessage("Adapting your plan...");
+    try {
+        const nextWeek = weekNumber + 1;
+        // Note: progressHistory here might not include the very latest entry due to closure scope,
+        // but the data is saved and will be available for next interactions.
+        const generatedPlan = await generateTransformationPlan(profile, nextWeek, progressHistory);
+        setPlan(generatedPlan);
+        setWeekNumber(nextWeek);
+        setCompletedWorkouts({});
+        setCurrentWeekStartDate(new Date().toISOString().slice(0, 10));
+    } catch (err: any) {
+        console.error(err);
+        setError("Failed to update plan.");
+    } finally {
+        setLoading(false);
+    }
+  };
   
   const toggleSelection = (key: 'cuisine' | 'workoutPreferences' | 'medicalConditions', val: string) => {
     setProfile(prev => {
@@ -255,7 +280,7 @@ const App: React.FC = () => {
       case 4: return <WorkoutStyleStep profile={profile} onToggleSelection={toggleSelection} onNext={() => setStep(5)} onPrev={() => setStep(3)} />;
       case 5: return <ExperienceStep profile={profile} setProfile={setProfile} onNext={() => setStep(6)} onPrev={() => setStep(4)} />;
       case 6: return <NutritionStep profile={profile} setProfile={setProfile} customCuisineInput={customCuisineInput} setCustomCuisineInput={setCustomCuisineInput} onToggleSelection={toggleSelection} onHandleAddCustomCuisine={handleAddCustomCuisine} onSubmit={handleSubmitOnboarding} onPrev={() => setStep(5)} loading={loading} loadingMessage={loadingMessage} error={error} />;
-      case 100: return plan ? <PlanDisplay plan={plan} goal={profile.goal} profile={profile} progressHistory={progressHistory} currentWeek={weekNumber} onAddProgress={(p)=>{}} onRefreshPlan={()=>{}} onUpdatePlanLocally={(p) => setPlan(p)} isRefreshing={loading} onEditGoals={() => setStep(2)} completedWorkouts={completedWorkouts} onMarkDayWorkoutComplete={handleMarkDayWorkoutComplete} currentWeekStartDate={currentWeekStartDate} /> : <div>Error: Plan not found.</div>;
+      case 100: return plan ? <PlanDisplay plan={plan} goal={profile.goal} profile={profile} progressHistory={progressHistory} currentWeek={weekNumber} onAddProgress={handleAddProgress} onRefreshPlan={handleRefreshPlan} onUpdatePlanLocally={(p) => setPlan(p)} isRefreshing={loading} onEditGoals={() => setStep(2)} completedWorkouts={completedWorkouts} onMarkDayWorkoutComplete={handleMarkDayWorkoutComplete} currentWeekStartDate={currentWeekStartDate} /> : <div>Error: Plan not found.</div>;
       default: setStep(0); return null;
     }
   };

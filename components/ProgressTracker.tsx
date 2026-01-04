@@ -40,15 +40,20 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ history, onAddEntry, 
     
     const entryDate = isEditing && editingEntryDate ? editingEntryDate : today;
 
+    // Construct measurements object conditionally to avoid 'undefined' values which break Firestore
+    const measurements: any = {
+      waist: formData.waist,
+      neck: formData.neck,
+    };
+    if (isFemale && formData.hips !== undefined) {
+      measurements.hips = formData.hips;
+    }
+
     const newEntry: ProgressEntry = {
       date: entryDate,
       weekNumber: 0, 
       weight: formData.weight,
-      measurements: {
-        waist: formData.waist,
-        neck: formData.neck,
-        hips: isFemale ? formData.hips : undefined,
-      }
+      measurements: measurements
     };
 
     onAddEntry(newEntry);
